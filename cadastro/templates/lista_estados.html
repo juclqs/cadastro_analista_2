@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Listagem de Estados{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Lista de Estados</h2>
+    <a href="{% url 'adicionar_estados' %}" class="btn btn-success mb-3">Adicionar Estado</a>
+    <a href="{% url 'exportar_estados' %}" class="btn btn-primary">Exportar para Excel</a>
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>Nome</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for estado in estados %}
+            <tr>
+                <td>{{ estado.nome }}</td>
+                <td>
+                    <a href="{% url 'editar_estados' estado.id %}" class="btn btn-warning btn-sm">Editar</a>
+                    <a href="{% url 'excluir_estados' estado.id %}" class="btn btn-danger btn-sm"
+                       onclick="return confirm('Deseja excluir este estado?');">Excluir</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="2" class="text-center">Nenhum estado encontrado.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

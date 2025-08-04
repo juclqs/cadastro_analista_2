@@ -1,0 +1,40 @@
+<form method="get" class="row g-3 align-items-end mb-4">
+    <div class="col-md-3">
+        <label for="nome" class="form-label">Nome:</label>
+        <input type="text" name="nome" id="nome" class="form-control" value="{{ nome_filtro }}">
+    </div>
+
+    <div class="col-md-3">
+        <label for="cpf" class="form-label">CPF:</label>
+        <input type="text" name="cpf" id="cpf" class="form-control" value="{{ cpf_filtro }}">
+    </div>
+
+    <div class="col-md-3">
+        <label for="campus" class="form-label">Campus:</label>
+        <select name="campus" id="campus" class="form-select">
+            <option value="">Todos</option>
+            {% for c in campi %}
+            <option value="{{ c.id }}" {% if campus_filtro==c.id|stringformat:"s" %}selected{% endif %}>{{ c.nome }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="col-md-3">
+        <label for="grupo" class="form-label">Grupo:</label>
+        <select name="grupo" id="grupo" class="form-select">
+            <option value="">Todos</option>
+            {% for g in grupos %}
+            <option value="{{ g.id }}" {% if grupo_filtro==g.id|stringformat:"s" %}selected{% endif %}>{{ g.nome }}
+            </option>
+            {% endfor %}
+        </select>
+        {% endfor %}
+        </select>
+    </div>
+
+    <div class="col-12 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+        <a href="{% url 'lista_usuarios' %}" class="btn btn-secondary">Limpar</a>
+    </div>
+</form>

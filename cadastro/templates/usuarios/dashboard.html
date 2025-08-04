@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+{% block header %}Sistema Cadastro{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+
+        <div class="col">
+            <a href="{% url 'lista_usuarios' %}" class="text-decoration-none">
+                <div class="card text-white bg-primary text-center h-100 shadow">
+                    <div class="card-body">
+                        <h4 class="card-title">Usuários</h4>
+                        <p class="card-text">Gerenciar cadastro de usuários.</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col">
+            <a href="{% url 'lista_grupos' %}" class="text-decoration-none">
+                <div class="card text-white bg-success text-center h-100 shadow">
+                    <div class="card-body">
+                        <h4 class="card-title">Grupos</h4>
+                        <p class="card-text">Visualizar e editar grupos de trabalho.</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col">
+            <a href="{% url 'lista_campus' %}" class="text-decoration-none">
+                <div class="card text-white bg-info text-center h-100 shadow">
+                    <div class="card-body">
+                        <h4 class="card-title">Campus</h4>
+                        <p class="card-text">Consultar e atualizar dados dos campus.</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col">
+            <a href="{% url 'lista_cidades' %}" class="text-decoration-none">
+                <div class="card text-white bg-warning text-center h-100 shadow">
+                    <div class="card-body">
+                        <h4 class="card-title">Cidades</h4>
+                        <p class="card-text">Gerenciar cidades vinculadas aos campus.</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col">
+            <a href="{% url 'lista_estados' %}" class="text-decoration-none">
+                <div class="card text-white bg-danger text-center h-100 shadow">
+                    <div class="card-body">
+                        <h4 class="card-title">Estados</h4>
+                        <p class="card-text">Consultar ou editar estados cadastrados.</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col">
+            <a href="{% url 'lista_editais' %}" class="text-decoration-none">
+                <div class="card text-white bg-dark text-center h-100 shadow">
+                    <div class="card-body">
+                        <h4 class="card-title">Editais</h4>
+                        <p class="card-text">Consultar ou editar editais cadastrados.</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

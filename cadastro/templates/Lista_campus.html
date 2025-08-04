@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Lista de Campus{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Lista de Campus</h2>
+        <a href="{% url 'adicionar_campus' %}" class="btn btn-success">Adicionar Campus</a>
+        <a href="{% url 'exportar_campus' %}" class="btn btn-primary">Exportar para Excel</a>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Nome</th>
+                    <th>Sigla</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for campus in campus %}
+                <tr>
+                    <td>{{ campus.nome }}</td>
+                    <td>{{ campus.sigla }}</td>
+                    <td>
+                        <a href="{% url 'editar_campus' campus.id %}" class="btn btn-sm btn-warning">Editar</a>
+                        <a href="{% url 'excluir_campus' campus.id %}" class="btn btn-sm btn-danger"
+                            onclick="return confirm('Tem certeza que deseja excluir este campus?');">
+                            Excluir
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="text-center">Nenhum campus encontrada.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
