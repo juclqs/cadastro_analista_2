@@ -70,4 +70,8 @@ urlpatterns = [
          views.visualizar_edital, name='visualizar_edital'),
     path('usuarios/editais/<int:edital_id>/',
          views.visualizar_edital, name='visualizar_edital'),
+    path('editais/<int:edital_id>/grupos/',
+         views.selecionar_grupo_trabalho, name='selecionar_grupo_trabalho'),
+    path('editais/<int:edital_id>/grupo/<int:grupo_id>/',
+         views.visualizar_edital_grupo, name='visualizar_edital_grupo'),
 ]

@@ -448,3 +448,15 @@ def adicionar_grupo_atendimento(request, edital_id):
         form = GrupoAtendimentoForm()
 
     return render(request, 'adicionar_grupo_atendimento.html', {'form': form, 'edital': edital})
+
+
+def selecionar_grupo_trabalho(request, edital_id):
+    edital = get_object_or_404(Edital, id=edital_id)
+    grupos = edital.grupos_trabalho.all()
+    return render(request, 'selecionar_grupo_trabalho.html', {'edital': edital, 'grupos': grupos})
+
+
+def visualizar_edital_grupo(request, edital_id, grupo_id):
+    edital = get_object_or_404(Edital, id=edital_id)
+    grupo = get_object_or_404(GrupoTrabalho, id=grupo_id, editais=edital)
+    return render(request, 'editais/visualizar_edital_grupo.html', {'edital': edital, 'grupo': grupo})

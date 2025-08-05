@@ -34,9 +34,9 @@
                         {% endfor %}
                     </td>
                     <td>
-                        <a href="{% url 'visualizar_edital' edital.id %}" class="btn btn-sm btn-info">Visualizar</a>
                         <a href="{% url 'editar_edital' edital.id %}" class="btn btn-sm btn-warning">Editar</a>
                         <a href="{% url 'excluir_edital' edital.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza?');">Excluir</a>
+                        <a href="{% url 'selecionar_grupo_trabalho' edital.id %}" class="btn btn-info btn-sm">Visualizar</a>
                     </td>
                 </tr>
                 {% empty %}

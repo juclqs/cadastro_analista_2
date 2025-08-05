@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}{{ grupo.nome }} - {{ edital.nome }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ grupo.nome }}</h2>
+    <p><strong>Edital:</strong> {{ edital.nome }} ({{ edital.numero }})</p>
+    <p><strong>Campi:</strong>
+        {% for campus in edital.campus.all %}
+            {{ campus.nome }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+    </p>
+
+    <!-- Aqui você pode adicionar dados específicos do grupo -->
+</div>
+{% endblock %}

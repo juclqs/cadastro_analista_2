@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Selecionar Grupo{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h3>Selecionar Grupo de Trabalho para: {{ edital.nome }}</h3>
+    <ul class="list-group mt-3">
+        {% for grupo in grupos %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            {{ grupo.nome }}
+            <a href="{% url 'visualizar_edital_grupo' edital.id grupo.id %}" class="btn btn-primary">Selecionar</a>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

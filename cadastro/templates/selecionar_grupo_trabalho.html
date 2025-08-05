@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}Selecionar Grupo{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h3>Selecionar grupo para o edital: {{ edital.nome }}</h3>
+    <ul class="list-group">
+        {% for grupo in grupos %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            {{ grupo.nome }}
+            <a href="{% url 'visualizar_edital_grupo' edital.id grupo.id %}" class="btn btn-sm btn-primary">Selecionar</a>
+        </li>
+        {% empty %}
+        <li class="list-group-item">Nenhum grupo de trabalho encontrado para este edital.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

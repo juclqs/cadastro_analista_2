@@ -45,6 +45,37 @@
 
     <h4>Datas Importantes</h4>
 
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Data do recurso</th>
+                    <th>Data Final do Recurso</th>
+                    <th>Campus</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for edital in editais %}
+                <tr>
+                    <td>{{ edital.data_final_analise|date:"d/m/Y" }}</td>
+                    <td>{{ edital.data_recurso|date:"d/m/Y" }}</td>
+                    <td>{{ edital.data_final_recurso|date:"d/m/Y" }}</td>
+                    <td>
+                        {% for c in edital.campus.all %}
+                            {{ c.nome }}{% if not forloop.last %}, {% endif %}
+                        {% empty %}
+                            <span class="text-muted">Nenhum</span>
+                        {% endfor %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center">Nenhum edital encontrado.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
     <!-- Formulário para salvar as datas -->
     <form method="post" novalidate>
         {% csrf_token %}
@@ -69,6 +100,7 @@
         <button type="submit" class="btn btn-primary">Salvar Datas</button>
     </form>
 
+    
     <!-- Formulário separado para importar equipe -->
     <form method="post" action="{% url 'importar_equipe_edital' edital.id %}" style="display:inline; margin-left: 10px;">
         {% csrf_token %}
