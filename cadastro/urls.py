@@ -62,4 +62,12 @@ urlpatterns = [
     path('editais/<int:edital_id>/excluir/',
          views.excluir_edital, name='excluir_edital'),
     path('editais/exportar/', views.exportar_editais, name='exportar_editais'),
+    path('edital/<int:id>/importar_equipe/',
+         views.importar_equipe_edital, name='importar_equipe_edital'),
+    path('editais/<int:edital_id>/adicionar-grupo/',
+         views.adicionar_grupo_atendimento, name='adicionar_grupo_atendimento'),
+    path('editais/<int:edital_id>/',
+         views.visualizar_edital, name='visualizar_edital'),
+    path('usuarios/editais/<int:edital_id>/',
+         views.visualizar_edital, name='visualizar_edital'),
 ]

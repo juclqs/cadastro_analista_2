@@ -1,5 +1,5 @@
 from django import forms
-from .models import Usuario, Cidade, Estado, Campus, GrupoTrabalho, Edital
+from .models import Usuario, Cidade, Estado, Campus, GrupoTrabalho, Edital, GrupoAtendimento
 
 
 class UsuarioForm(forms.ModelForm):
@@ -68,7 +68,19 @@ class GrupoTrabalhoForm(forms.ModelForm):
 class EditalForm(forms.ModelForm):
     class Meta:
         model = Edital
-        fields = '__all__'
+        fields = ['nome', 'numero', 'campus', 'data_final_analise',
+                  'data_recurso', 'data_final_recurso']
         widgets = {
-            'campus': forms.SelectMultiple(attrs={'class': 'form-control'})
+            'campus': forms.SelectMultiple(attrs={'class': 'form-control'}),
+            'final_analise': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'recurso': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'final_recurso': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'nome': forms.TextInput(attrs={'class': 'form-control'}),
+            'numero': forms.NumberInput(attrs={'class': 'form-control'}),
         }
+
+
+class GrupoAtendimentoForm(forms.ModelForm):
+    class Meta:
+        model = GrupoAtendimento
+        fields = ['nome']

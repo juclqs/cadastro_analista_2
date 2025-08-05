@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Visualizar Edital{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <!-- Mensagens de sucesso -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Mensagens de erro -->
+    {% if form.errors %}
+        <div class="alert alert-danger">
+            <ul>
+            {% for field in form %}
+                {% for error in field.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+            {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <h2>{{ edital.nome }} ({{ edital.numero }})</h2>
+
+    <p><strong>Campi:</strong>
+        {% if edital.campus.all %}
+            {% for c in edital.campus.all %}
+                {{ c.nome }}{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+        {% else %}
+            {{ edital.campus.nome }}
+        {% endif %}
+    </p>
+
+    <h4>Datas Importantes</h4>
+
+    <!-- Formulário para salvar as datas -->
+    <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label for="data_final_analise" class="form-label">Data final da análise:</label>
+                <input type="date" id="data_final_analise" name="data_final_analise"
+                       class="form-control" value="{{ edital.data_final_analise|date:'Y-m-d' }}">
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="data_recurso" class="form-label">Data do recurso:</label>
+                <input type="date" id="data_recurso" name="data_recurso"
+                       class="form-control" value="{{ edital.data_recurso|date:'Y-m-d' }}">
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="data_final_recurso" class="form-label">Data final da análise do recurso:</label>
+                <input type="date" id="data_final_recurso" name="data_final_recurso"
+                       class="form-control" value="{{ edital.data_final_recurso|date:'Y-m-d' }}">
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Salvar Datas</button>
+    </form>
+
+    <!-- Formulário separado para importar equipe -->
+    <form method="post" action="{% url 'importar_equipe_edital' edital.id %}" style="display:inline; margin-left: 10px;">
+        {% csrf_token %}
+    <button type="submit" class="btn btn-primary ms-2">Importar Equipe</button>
+    </form>
+   
+</div>
+{% endblock %}

@@ -59,6 +59,21 @@ class Edital(models.Model):
     nome = models.CharField(max_length=200)
     numero = models.CharField(max_length=50)
     campus = models.ManyToManyField(Campus, blank=True)
+    data_final_analise = models.DateField(null=True, blank=True)
+    data_recurso = models.DateField(null=True, blank=True)
+    data_final_recurso = models.DateField(null=True, blank=True)
+    grupos_trabalho = models.ManyToManyField(
+        GrupoTrabalho, related_name='editais')
+    equipe = models.ManyToManyField(Usuario, related_name='editais')
 
     def __str__(self):
         return f"{self.nome} ({self.numero})"
+
+
+class GrupoAtendimento(models.Model):
+    nome = models.CharField(max_length=200)
+    edital = models.ForeignKey(
+        Edital, on_delete=models.CASCADE, related_name='grupos')
+
+    def __str__(self):
+        return self.nome

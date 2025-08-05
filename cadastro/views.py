@@ -2,8 +2,10 @@ import pandas as pd
 import openpyxl
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
+from django.contrib import messages
+from django.shortcuts import redirect
 from .models import Usuario, Campus, GrupoTrabalho, Cidade, Estado, Edital
-from .forms import UsuarioForm, CidadeForm, EstadoForm, CampusForm, GrupoTrabalhoForm, EditalForm
+from .forms import UsuarioForm, CidadeForm, EstadoForm, CampusForm, GrupoTrabalhoForm, EditalForm, GrupoAtendimentoForm
 
 # ==================== USUÁRIOS ====================
 
@@ -397,3 +399,52 @@ def exportar_editais(request):
     response['Content-Disposition'] = 'attachment; filename=editais.xlsx'
     wb.save(response)
     return response
+
+
+def visualizar_edital(request, edital_id):
+    edital = get_object_or_404(Edital, pk=edital_id)
+
+    if request.method == 'POST':
+        form = EditalForm(request.POST, instance=edital)
+        if form.is_valid():
+            form.save()
+            return redirect('visualizar_edital', edital_id=edital.pk)
+    else:
+        form = EditalForm(instance=edital)
+
+    return render(request, 'visualizar_edital.html', {'form': form, 'edital': edital})
+
+
+def importar_equipe_edital(request, id):
+    edital = get_object_or_404(Edital, id=id)
+
+    # Ajuste para relacionamento correto com grupos de trabalho
+    grupos = edital.grupos_trabalho.all()  # ajustar conforme seu modelo
+
+    usuarios_importados = 0
+    for grupo in grupos:
+        usuarios = grupo.usuarios.all()  # ou o nome correto do relacionamento
+        for usuario in usuarios:
+            if not edital.equipe.filter(id=usuario.id).exists():
+                edital.equipe.add(usuario)
+                usuarios_importados += 1
+
+    messages.success(
+        request, f'{usuarios_importados} usuários importados para a equipe do edital.')
+    return redirect('visualizar_edital', edital_id=edital.id)
+
+
+def adicionar_grupo_atendimento(request, edital_id):
+    edital = get_object_or_404(Edital, id=edital_id)
+
+    if request.method == 'POST':
+        form = GrupoAtendimentoForm(request.POST)
+        if form.is_valid():
+            grupo = form.save(commit=False)
+            grupo.edital = edital
+            grupo.save()
+            return redirect('visualizar_edital', edital_id=edital.id)
+    else:
+        form = GrupoAtendimentoForm()
+
+    return render(request, 'adicionar_grupo_atendimento.html', {'form': form, 'edital': edital})
