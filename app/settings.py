@@ -123,3 +123,7 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGIN_REDIRECT_URL = '/'  # ou a página que você quer após o login
+LOGOUT_REDIRECT_URL = '/login/'
+LOGIN_URL = '/login/'

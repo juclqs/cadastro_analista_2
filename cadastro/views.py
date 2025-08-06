@@ -8,6 +8,7 @@ from django.http import HttpResponse
 from django.contrib import messages
 from unidecode import unidecode
 from django.db.models import Q
+from django.contrib.auth.decorators import login_required
 from .models import Usuario, Campus, GrupoTrabalho, Cidade, Estado, Edital
 from .forms import (
     UsuarioForm, CidadeForm, EstadoForm, CampusForm,
@@ -17,6 +18,7 @@ from .forms import (
 # ==================== USUÁRIOS ====================
 
 
+@login_required
 def remover_acentos(texto):
     if texto is None:
         return ''
@@ -24,6 +26,7 @@ def remover_acentos(texto):
     return ''.join([c for c in nfkd_form if not unicodedata.combining(c)])
 
 
+@login_required
 def lista_usuarios(request):
     usuarios = Usuario.objects.all()
 
@@ -68,6 +71,7 @@ def lista_usuarios(request):
     return render(request, 'usuarios/lista_usuarios.html', context)
 
 
+@login_required
 def adicionar_usuario(request):
     if request.method == 'POST':
         form = UsuarioForm(request.POST)
@@ -79,6 +83,7 @@ def adicionar_usuario(request):
     return render(request, 'usuarios/formulario.html', {'form': form})
 
 
+@login_required
 def editar_usuario(request, usuario_id):
     usuario = get_object_or_404(Usuario, id=usuario_id)
     if request.method == 'POST':
@@ -91,6 +96,7 @@ def editar_usuario(request, usuario_id):
     return render(request, 'usuarios/formulario.html', {'form': form})
 
 
+@login_required
 def excluir_usuario(request, usuario_id):
     usuario = get_object_or_404(Usuario, id=usuario_id)
     usuario.delete()
@@ -99,6 +105,7 @@ def excluir_usuario(request, usuario_id):
 # ==================== CIDADES ====================
 
 
+@login_required
 def lista_cidades(request):
     cidades = Cidade.objects.all()
 
@@ -127,6 +134,7 @@ def lista_cidades(request):
     return render(request, 'lista_cidades.html', context)
 
 
+@login_required
 def adicionar_cidade(request):
     if request.method == 'POST':
         form = CidadeForm(request.POST)
@@ -138,6 +146,7 @@ def adicionar_cidade(request):
     return render(request, 'usuarios/formulario.html', {'form': form})
 
 
+@login_required
 def editar_cidade(request, cidade_id):
     cidade = get_object_or_404(Cidade, id=cidade_id)
     if request.method == 'POST':
@@ -150,6 +159,7 @@ def editar_cidade(request, cidade_id):
     return render(request, 'usuarios/formulario.html', {'form': form})
 
 
+@login_required
 def excluir_cidade(request, cidade_id):
     cidade = get_object_or_404(Cidade, id=cidade_id)
     cidade.delete()
@@ -158,11 +168,13 @@ def excluir_cidade(request, cidade_id):
 # ==================== ESTADOS ====================
 
 
+@login_required
 def lista_estados(request):
     estados = Estado.objects.all()
     return render(request, 'lista_estados.html', {'estados': estados})
 
 
+@login_required
 def adicionar_estado(request):
     if request.method == 'POST':
         form = EstadoForm(request.POST)
@@ -174,6 +186,7 @@ def adicionar_estado(request):
     return render(request, 'usuarios/formulario.html', {'form': form})
 
 
+@login_required
 def editar_estado(request, estado_id):
     estado = get_object_or_404(Estado, id=estado_id)
     if request.method == 'POST':
@@ -186,6 +199,7 @@ def editar_estado(request, estado_id):
     return render(request, 'usuarios/formulario.html', {'form': form})
 
 
+@login_required
 def excluir_estado(request, estado_id):
     estado = get_object_or_404(Estado, id=estado_id)
     estado.delete()
@@ -194,11 +208,13 @@ def excluir_estado(request, estado_id):
 # ==================== CAMPUS ====================
 
 
+@login_required
 def lista_campus(request):
     campus = Campus.objects.all()
     return render(request, 'lista_campus.html', {'campus': campus})
 
 
+@login_required
 def adicionar_campus(request):
     if request.method == 'POST':
         form = CampusForm(request.POST)
@@ -210,6 +226,7 @@ def adicionar_campus(request):
     return render(request, 'usuarios/formulario.html', {'form': form})
 
 
+@login_required
 def editar_campus(request, campus_id):
     campus = get_object_or_404(Campus, id=campus_id)
     if request.method == 'POST':
@@ -222,6 +239,7 @@ def editar_campus(request, campus_id):
     return render(request, 'usuarios/formulario.html', {'form': form})
 
 
+@login_required
 def excluir_campus(request, campus_id):
     campus = get_object_or_404(Campus, id=campus_id)
     campus.delete()
@@ -230,11 +248,13 @@ def excluir_campus(request, campus_id):
 # ==================== GRUPOS DE TRABALHO ====================
 
 
+@login_required
 def lista_grupos(request):
     grupos = GrupoTrabalho.objects.all()
     return render(request, 'lista_grupos.html', {'grupos': grupos})
 
 
+@login_required
 def adicionar_grupo(request):
     if request.method == 'POST':
         form = GrupoTrabalhoForm(request.POST)
@@ -246,6 +266,7 @@ def adicionar_grupo(request):
     return render(request, 'usuarios/formulario.html', {'form': form})
 
 
+@login_required
 def editar_grupo(request, grupo_id):
     grupo = get_object_or_404(GrupoTrabalho, id=grupo_id)
     if request.method == 'POST':
@@ -258,18 +279,21 @@ def editar_grupo(request, grupo_id):
     return render(request, 'usuarios/formulario.html', {'form': form})
 
 
+@login_required
 def excluir_grupo(request, grupo_id):
     grupo = get_object_or_404(GrupoTrabalho, id=grupo_id)
     grupo.delete()
     return redirect('lista_grupos')
 
 
+@login_required
 def dashboard(request):
     return render(request, 'usuarios/dashboard.html')
 
 # ==================== EXPORTAÇÃO / IMPORTAÇÃO ====================
 
 
+@login_required
 def exportar_usuarios(request):
     usuarios = Usuario.objects.select_related('campus__cidade__estado').all()
     dados = []
@@ -301,6 +325,7 @@ def exportar_usuarios(request):
     return response
 
 
+@login_required
 def exportar_grupos(request):
     wb = openpyxl.Workbook()
     ws = wb.active
@@ -321,6 +346,7 @@ def exportar_grupos(request):
     return response
 
 
+@login_required
 def exportar_cidades(request):
     wb = openpyxl.Workbook()
     ws = wb.active
@@ -341,6 +367,7 @@ def exportar_cidades(request):
     return response
 
 
+@login_required
 def exportar_estados(request):
     wb = openpyxl.Workbook()
     ws = wb.active
@@ -361,6 +388,7 @@ def exportar_estados(request):
     return response
 
 
+@login_required
 def exportar_campus(request):
     wb = openpyxl.Workbook()
     ws = wb.active
@@ -381,6 +409,7 @@ def exportar_campus(request):
     return response
 
 
+@login_required
 def importar_excel(request):
     if request.method == 'POST' and request.FILES['arquivo']:
         df = pd.read_excel(request.FILES['arquivo'])
@@ -420,12 +449,13 @@ def importar_excel(request):
 
 
 # ==================== EDITAIS ====================
-
+@login_required
 def lista_edital(request):
     editais = Edital.objects.all()
     return render(request, 'lista_editais.html', {'editais': editais})
 
 
+@login_required
 def adicionar_edital(request):
     if request.method == 'POST':
         form = EditalForm(request.POST)
@@ -438,6 +468,7 @@ def adicionar_edital(request):
     return render(request, 'usuarios/formulario.html', {'form': form})
 
 
+@login_required
 def editar_edital(request, edital_id):
     edital = get_object_or_404(Edital, id=edital_id)
     if request.method == 'POST':
@@ -450,12 +481,14 @@ def editar_edital(request, edital_id):
     return render(request, 'usuarios/formulario.html', {'form': form})
 
 
+@login_required
 def excluir_edital(request, edital_id):
     edital = get_object_or_404(Edital, id=edital_id)
     edital.delete()
     return redirect('lista_editais')
 
 
+@login_required
 def exportar_editais(request):
     wb = openpyxl.Workbook()
     ws = wb.active
@@ -477,6 +510,7 @@ def exportar_editais(request):
     return response
 
 
+@login_required
 def visualizar_edital(request, edital_id):
     edital = get_object_or_404(Edital, pk=edital_id)
 
@@ -491,6 +525,7 @@ def visualizar_edital(request, edital_id):
     return render(request, 'visualizar_edital.html', {'form': form, 'edital': edital})
 
 
+@login_required
 def importar_equipe_edital(request, id):
     edital = get_object_or_404(Edital, id=id)
 
@@ -509,6 +544,7 @@ def importar_equipe_edital(request, id):
     return redirect('visualizar_edital', edital_id=edital.id)
 
 
+@login_required
 def adicionar_grupo_atendimento(request, edital_id):
     edital = get_object_or_404(Edital, id=edital_id)
 
@@ -525,12 +561,14 @@ def adicionar_grupo_atendimento(request, edital_id):
     return render(request, 'adicionar_grupo_atendimento.html', {'form': form, 'edital': edital})
 
 
+@login_required
 def selecionar_grupo_trabalho(request, edital_id):
     edital = get_object_or_404(Edital, id=edital_id)
     grupos = grupos = edital.grupos.all()
     return render(request, 'selecionar_grupo_trabalho.html', {'edital': edital, 'grupos': grupos})
 
 
+@login_required
 def visualizar_edital_grupo(request, edital_id, grupo_id):
     edital = get_object_or_404(Edital, id=edital_id)
     grupo = get_object_or_404(GrupoTrabalho, id=grupo_id, editais=edital)
