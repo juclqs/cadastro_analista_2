@@ -1,18 +1,71 @@
+import re
+from unidecode import unidecode
 import pandas as pd
 import openpyxl
+import unicodedata
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.contrib import messages
-from django.shortcuts import redirect
+from unidecode import unidecode
+from django.db.models import Q
 from .models import Usuario, Campus, GrupoTrabalho, Cidade, Estado, Edital
-from .forms import UsuarioForm, CidadeForm, EstadoForm, CampusForm, GrupoTrabalhoForm, EditalForm, GrupoAtendimentoForm
+from .forms import (
+    UsuarioForm, CidadeForm, EstadoForm, CampusForm,
+    GrupoTrabalhoForm, EditalForm, GrupoAtendimentoForm
+)
 
 # ==================== USUÁRIOS ====================
 
 
+def remover_acentos(texto):
+    if texto is None:
+        return ''
+    nfkd_form = unicodedata.normalize('NFKD', texto)
+    return ''.join([c for c in nfkd_form if not unicodedata.combining(c)])
+
+
 def lista_usuarios(request):
     usuarios = Usuario.objects.all()
-    return render(request, 'usuarios/lista.html', {'usuarios': usuarios})
+
+    termo_busca_nome = request.GET.get('nome')
+    termo_busca_cpf = request.GET.get('cpf')
+    termo_busca_campus = request.GET.getlist('campus')
+    termo_busca_grupos = request.GET.getlist('grupos')
+
+    if termo_busca_cpf:
+        cpf_limpo = re.sub(r'\D', '', termo_busca_cpf)
+        usuarios = usuarios.filter(cpf__icontains=cpf_limpo)
+
+    if termo_busca_campus and termo_busca_campus != ['']:
+        usuarios = usuarios.filter(campus__id__in=termo_busca_campus)
+
+    if termo_busca_grupos and termo_busca_grupos != ['']:
+        usuarios = usuarios.filter(
+            grupos__id__in=termo_busca_grupos).distinct()
+
+    # Aí filtra o nome via Python já na lista filtrada:
+    if termo_busca_nome:
+        termo_busca_normalizado = remover_acentos(termo_busca_nome).lower()
+        usuarios = [
+            u for u in usuarios if termo_busca_normalizado in unidecode(u.nome).lower()]
+    else:
+        usuarios = usuarios.order_by('nome')
+
+    # Busca campi e grupos para os filtros no template
+    campi = Campus.objects.all().order_by('nome')
+    grupos = GrupoTrabalho.objects.all().order_by('nome')
+
+    context = {
+        'usuarios': usuarios,
+        'campi': campi,
+        'grupos': grupos,
+        'termo_busca_nome': termo_busca_nome,
+        'termo_busca_cpf': termo_busca_cpf,
+        'termo_busca_campus': termo_busca_campus,
+        'termo_busca_grupos': termo_busca_grupos,
+    }
+
+    return render(request, 'usuarios/lista_usuarios.html', context)
 
 
 def adicionar_usuario(request):
@@ -48,7 +101,30 @@ def excluir_usuario(request, usuario_id):
 
 def lista_cidades(request):
     cidades = Cidade.objects.all()
-    return render(request, 'lista_cidades.html', {'cidades': cidades})
+
+    # Adicionar o filtro
+    termo_busca_nome = request.GET.get('nome')
+    termo_busca_estado = request.GET.get('estado')
+
+    if termo_busca_nome:
+        cidades = cidades.filter(nome__icontains=termo_busca_nome)
+
+    if termo_busca_estado:
+        # A busca por estado precisa do ID ou do nome. Vamos usar o ID.
+        cidades = cidades.filter(estado__id=termo_busca_estado)
+
+    # Buscar todos os estados para popular o seletor no template
+    estados = Estado.objects.all().order_by('nome')
+
+    # Passar a lista de estados para o template
+    context = {
+        'cidades': cidades,
+        'estados': estados,
+        'termo_busca_nome': termo_busca_nome,
+        'termo_busca_estado': termo_busca_estado,
+    }
+
+    return render(request, 'lista_cidades.html', context)
 
 
 def adicionar_cidade(request):
@@ -418,12 +494,11 @@ def visualizar_edital(request, edital_id):
 def importar_equipe_edital(request, id):
     edital = get_object_or_404(Edital, id=id)
 
-    # Ajuste para relacionamento correto com grupos de trabalho
-    grupos = edital.grupos_trabalho.all()  # ajustar conforme seu modelo
+    grupos = edital.grupos.all()
 
     usuarios_importados = 0
     for grupo in grupos:
-        usuarios = grupo.usuarios.all()  # ou o nome correto do relacionamento
+        usuarios = grupo.usuarios.all()
         for usuario in usuarios:
             if not edital.equipe.filter(id=usuario.id).exists():
                 edital.equipe.add(usuario)
@@ -452,7 +527,7 @@ def adicionar_grupo_atendimento(request, edital_id):
 
 def selecionar_grupo_trabalho(request, edital_id):
     edital = get_object_or_404(Edital, id=edital_id)
-    grupos = edital.grupos_trabalho.all()
+    grupos = grupos = edital.grupos.all()
     return render(request, 'selecionar_grupo_trabalho.html', {'edital': edital, 'grupos': grupos})
 
 

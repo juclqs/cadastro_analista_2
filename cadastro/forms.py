@@ -68,15 +68,23 @@ class GrupoTrabalhoForm(forms.ModelForm):
 class EditalForm(forms.ModelForm):
     class Meta:
         model = Edital
-        fields = ['nome', 'numero', 'campus', 'data_final_analise',
-                  'data_recurso', 'data_final_recurso']
+        fields = ['nome', 'numero', 'campus',
+                  'avaliadores_historico', 'avaliadores_renda',
+                  'data_inicial_analise_historico', 'data_final_analise_historico',
+                  'data_recurso_historico', 'data_final_recurso_historico', 'data_inicial_analise_renda',
+                  'data_final_analise_renda', 'data_recurso_renda',]
         widgets = {
             'campus': forms.SelectMultiple(attrs={'class': 'form-control'}),
-            'final_analise': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-            'recurso': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-            'final_recurso': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'nome': forms.TextInput(attrs={'class': 'form-control'}),
-            'numero': forms.NumberInput(attrs={'class': 'form-control'}),
+            'numero': forms.TextInput(attrs={'class': 'form-control'}),
+            'data_inicial_analise_historico': forms.DateInput(attrs={'type': 'date'}),
+            'data_final_analise_historico': forms.DateInput(attrs={'type': 'date'}),
+            'data_recurso_historico': forms.DateInput(attrs={'type': 'date'}),
+            'data_final_recurso_historico': forms.DateInput(attrs={'type': 'date'}),
+            'data_inicial_analise_renda': forms.DateInput(attrs={'type': 'date'}),
+            'data_final_analise_renda': forms.DateInput(attrs={'type': 'date'}),
+            'data_recurso_renda': forms.DateInput(attrs={'type': 'date'}),
+            'data_final_recurso_renda': forms.DateInput(attrs={'type': 'date'}),
         }
 
 

@@ -1,19 +1,89 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Detalhes do Edital: {{ edital.nome }}</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #fafafa;
+      color: #333;
+    }
+    h1 {
+      color: #222;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .section {
+      border: 1px solid #ccc;
+      background-color: #f7f9fc;
+      padding: 15px 20px;
+      border-radius: 6px;
+      margin-top: 20px;
+    }
+    .section h2 {
+      margin-top: 0;
+      color: #004085;
+      border-bottom: 2px solid #004085;
+      padding-bottom: 5px;
+    }
+    p {
+      margin: 8px 0;
+    }
+    strong {
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Detalhes do Edital: {{ edital.nome }}</h1>
 
-{% block title %}Selecionar Grupo{% endblock %}
+    <p><strong>Número:</strong> {{ edital.numero }}</p>
+    <p><strong>Campus:</strong>
+      {% for c in edital.campus.all %}
+        {{ c.nome }}{% if not forloop.last %}, {% endif %}
+      {% endfor %}
+    </p>
 
-{% block content %}
-<div class="container mt-4">
-    <h3>Selecionar grupo para o edital: {{ edital.nome }}</h3>
-    <ul class="list-group">
-        {% for grupo in grupos %}
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-            {{ grupo.nome }}
-            <a href="{% url 'visualizar_edital_grupo' edital.id grupo.id %}" class="btn btn-sm btn-primary">Selecionar</a>
-        </li>
-        {% empty %}
-        <li class="list-group-item">Nenhum grupo de trabalho encontrado para este edital.</li>
+    <div class="section">
+      <h2>Dados de Histórico</h2>
+      <p><strong>Avaliadores Histórico:</strong>
+        {% for a in edital.avaliadores_historico.all %}
+          {{ a.nome }}{% if not forloop.last %}, {% endif %}
         {% endfor %}
-    </ul>
-</div>
-{% endblock %}
+      </p>
+      <p><strong>Data Inicial Análise Histórico:</strong> {{ edital.data_inicial_analise_historico|date:"d/m/Y" }}</p>
+      <p><strong>Data Final Análise Histórico:</strong> {{ edital.data_final_analise_historico|date:"d/m/Y" }}</p>
+      <p><strong>Data Recurso Histórico:</strong> {{ edital.data_recurso_historico|date:"d/m/Y" }}</p>
+      <p><strong>Data Final Recurso Histórico:</strong> {{ edital.data_final_recurso_historico|date:"d/m/Y" }}</p>
+    </div>
+
+    <div class="section">
+      <h2>Dados de Renda</h2>
+      <p><strong>Avaliadores Renda:</strong>
+        {% for a in edital.avaliadores_renda.all %}
+          {{ a.nome }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+      </p>
+      <p><strong>Data Inicial Análise Renda:</strong> {{ edital.data_inicial_analise_renda|date:"d/m/Y" }}</p>
+      <p><strong>Data Final Análise Renda:</strong> {{ edital.data_final_analise_renda|date:"d/m/Y" }}</p>
+      <p><strong>Data Recurso Renda:</strong> {{ edital.data_recurso_renda|date:"d/m/Y" }}</p>
+      <p><strong>Data Final Recurso Renda:</strong> {{ edital.data_final_recurso_renda|date:"d/m/Y" }}</p>
+    </div>
+
+    <p><strong>Grupos de Atendimento:</strong>
+      {% for grupo in edital.grupos_de_atendimento.all %}
+        {{ grupo.nome }}{% if not forloop.last %}, {% endif %}
+      {% endfor %}
+    </p>
+  </div>
+</body>
+</html>

@@ -41,7 +41,8 @@ class Usuario(models.Model):
     endereco = models.CharField(max_length=200)
     chave_pix = models.CharField(max_length=100, null=True, blank=True)
     campus = models.ForeignKey(Campus, on_delete=models.SET_NULL, null=True)
-    grupos = models.ManyToManyField(GrupoTrabalho)
+    grupos = models.ForeignKey(
+        GrupoTrabalho, on_delete=models.SET_NULL, null=True, blank=True)
     banco = models.CharField(max_length=20)
     agencia = models.CharField(max_length=20)
     conta = models.CharField(max_length=20)
@@ -59,12 +60,18 @@ class Edital(models.Model):
     nome = models.CharField(max_length=200)
     numero = models.CharField(max_length=50)
     campus = models.ManyToManyField(Campus, blank=True)
-    data_final_analise = models.DateField(null=True, blank=True)
-    data_recurso = models.DateField(null=True, blank=True)
-    data_final_recurso = models.DateField(null=True, blank=True)
-    grupos_trabalho = models.ManyToManyField(
-        GrupoTrabalho, related_name='editais')
-    equipe = models.ManyToManyField(Usuario, related_name='editais')
+    avaliadores_historico = models.ManyToManyField(
+        Usuario, blank=True, related_name='editais_historico')
+    avaliadores_renda = models.ManyToManyField(
+        Usuario, blank=True, related_name='editais_renda')
+    data_inicial_analise_historico = models.DateField(null=True, blank=True)
+    data_final_analise_historico = models.DateField(null=True, blank=True)
+    data_recurso_historico = models.DateField(null=True, blank=True)
+    data_final_recurso_historico = models.DateField(null=True, blank=True)
+    data_inicial_analise_renda = models.DateField(null=True, blank=True)
+    data_final_analise_renda = models.DateField(null=True, blank=True)
+    data_recurso_renda = models.DateField(null=True, blank=True)
+    data_final_recurso_renda = models.DateField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.nome} ({self.numero})"

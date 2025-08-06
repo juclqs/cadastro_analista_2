@@ -31,7 +31,6 @@ class UsuarioAdmin(admin.ModelAdmin):
     list_display = ('nome', 'cpf', 'matricula', 'campus')
     search_fields = ('nome', 'cpf', 'matricula')
     list_filter = ('campus', 'grupos')
-    filter_horizontal = ('grupos',)
 
 
 @admin.register(Edital)
