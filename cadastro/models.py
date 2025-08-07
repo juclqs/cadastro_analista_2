@@ -41,8 +41,7 @@ class Usuario(models.Model):
     endereco = models.CharField(max_length=200)
     chave_pix = models.CharField(max_length=100, null=True, blank=True)
     campus = models.ForeignKey(Campus, on_delete=models.SET_NULL, null=True)
-    grupos = models.ForeignKey(
-        GrupoTrabalho, on_delete=models.SET_NULL, null=True, blank=True)
+    grupos = models.ManyToManyField(GrupoTrabalho, blank=True, null=True)
     banco = models.CharField(max_length=20)
     agencia = models.CharField(max_length=20)
     conta = models.CharField(max_length=20)
