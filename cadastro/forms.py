@@ -106,7 +106,7 @@ class EditalForm(forms.ModelForm):
                   'avaliadores_historico', 'avaliadores_renda',
                   'data_inicial_analise_historico', 'data_final_analise_historico',
                   'data_recurso_historico', 'data_final_recurso_historico', 'data_inicial_analise_renda',
-                  'data_final_analise_renda', 'data_recurso_renda',]
+                  'data_final_analise_renda', 'data_recurso_renda', 'ativo', 'id', 'observacoes']
         widgets = {
             'campus': forms.SelectMultiple(attrs={'class': 'form-control'}),
             'nome': forms.TextInput(attrs={'class': 'form-control'}),
@@ -119,6 +119,9 @@ class EditalForm(forms.ModelForm):
             'data_final_analise_renda': forms.DateInput(attrs={'type': 'date'}),
             'data_recurso_renda': forms.DateInput(attrs={'type': 'date'}),
             'data_final_recurso_renda': forms.DateInput(attrs={'type': 'date'}),
+            'observacoes': forms.Textarea(attrs={'class': 'form-control'}),
+            'ativo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'id': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly'}),
         }
 
 

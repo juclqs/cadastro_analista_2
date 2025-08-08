@@ -13,13 +13,27 @@
     </div>
 
     <!-- Formulário de Filtros -->
-    <form method="get" class="mb-3 d-flex gap-2">
-        <input type="text" name="nome" placeholder="Nome do edital" class="form-control" value="{{ request.GET.nome }}">
-        <input type="text" name="numero" placeholder="Número" class="form-control" value="{{ request.GET.numero }}">
-        <input type="text" name="campus" placeholder="Campus" class="form-control" value="{{ request.GET.campus }}">
-        <input type="text" name="ativo" placeholder="Ativo" class="form-control" value="{{ request.GET.ativo }}">
-        <button class="btn btn-outline-secondary" type="submit">Buscar</button>
-        <a href="{% url 'lista_editais' %}" class="btn btn-secondary">Limpar</a>
+    <form method="get" class="row g-3 align-items-end mb-4">
+        <div class="col-md-3">
+            <label for="nome" class="form-label">Nome:</label>
+            <input type="text" name="nome" placeholder="Informe o nome do edital" class="form-control" value="{{ request.GET.nome }}">
+        </div>
+        <div class="col-md-3">  
+            <label for="numero" class="form-label">Número:</label>
+            <input type="text" name="numero" placeholder="Informe o número do edital" class="form-control" value="{{ request.GET.numero }}">
+        </div>
+        <div class="col-md-3">
+            <label for="campus" class="form-label">Campus:</label>
+            <input type="text" name="campus" placeholder="Informe o campus" class="form-control" value="{{ request.GET.campus }}">
+        </div>
+        <div class="col-md-3">
+            <label for="ativo" class="form-label">Ativo:</label>
+            <input type="text" name="ativo" placeholder="Informe se está ativo" class="form-control" value="{{ request.GET.ativo }}">
+        </div>
+        <div class="col-12 d-flex gap-2">
+            <button class="btn btn-outline-secondary" type="submit">Buscar</button>
+            <a href="{% url 'lista_usuarios' %}" class="btn btn-secondary">Limpar</a>
+        </div>
     </form>
 
     <!-- Tabela -->
@@ -52,9 +66,6 @@
                         <a href="{% url 'editar_edital' edital.id %}" class="btn btn-sm btn-warning">Editar</a>
                         <a href="{% url 'excluir_edital' edital.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza?');">Excluir</a>
                         <a href="{% url 'selecionar_grupo_trabalho' edital.id %}" class="btn btn-info btn-sm">Visualizar</a>
-                        <a href="{% url 'alternar_ativo_edital' edital.id %}" 
-                        class="btn btn-sm {% if edital.ativo %}btn-secondary{% else %}btn-success{% endif %}">
-                        {% if edital.ativo %}Inativar{% else %}Ativar{% endif %}
                         </a>
                     </td>
                 </tr>

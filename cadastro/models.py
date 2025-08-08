@@ -56,7 +56,7 @@ class Usuario(models.Model):
         auto_now=True, null=True, blank=True)
     ativo = models.BooleanField(default=True, null=True, blank=True)
     recebeu_email = models.BooleanField(default=False, null=True, blank=True)
-    observacoes = models.TextField(null=True, blank=True)
+    observacoes = models.TextField(max_length=200, null=True, blank=True)
 
     def clean(self):
         self.cpf = ''.join(filter(str.isdigit, self.cpf))
@@ -88,7 +88,7 @@ class Edital(models.Model):
         auto_now_add=True, null=True, blank=True)
     data_atualizacao = models.DateTimeField(
         auto_now=True, null=True, blank=True)
-    observacoes = models.TextField(null=True, blank=True)
+    observacoes = models.TextField(max_length=200, null=True, blank=True)
 
     def __str__(self):
         return f"{self.nome} ({self.numero})"

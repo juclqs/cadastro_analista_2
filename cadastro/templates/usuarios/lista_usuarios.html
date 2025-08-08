@@ -15,12 +15,19 @@
     <form method="get" class="row g-3 align-items-end mb-4">
         <div class="col-md-3">
             <label for="nome" class="form-label">Nome:</label>
-            <input type="text" name="nome" id="nome" class="form-control" value="{{ nome_filtro }}">
+            <input type="text" name="nome" placeholder="Informe o nome" id="nome" class="form-control"
+                value="{{ nome_filtro }}">
+        </div>
+        <div class="col-md-3">
+            <label for="cpf" class="form-label">CPF:</label>
+            <input type="text" name="cpf" placeholder="Informe o CPF" id="cpf" class="form-control"
+                value="{{ cpf_filtro }}">
         </div>
 
         <div class="col-md-3">
-            <label for="cpf" class="form-label">CPF:</label>
-            <input type="text" name="cpf" id="cpf" class="form-control" value="{{ cpf_filtro }}">
+            <label for="ativo" class="form-label">Ativo:</label>
+            <input type="text" name="ativo" placeholder="Informe se está ativo" id="ativo" class="form-control"
+                value="{{ ativo_filtro|default_if_none:'' }}">
         </div>
 
         <div class="col-md-3">
@@ -42,8 +49,8 @@
                     g.nome }}</option>
                 {% endfor %}
             </select>
-        </div>
 
+        </div>
         <div class="col-12 d-flex gap-2">
             <button class="btn btn-outline-secondary" type="submit">Buscar</button>
             <a href="{% url 'lista_usuarios' %}" class="btn btn-secondary">Limpar</a>

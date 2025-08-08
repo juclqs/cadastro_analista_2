@@ -35,6 +35,7 @@ def lista_usuarios(request):
     termo_busca_cpf = request.GET.get('cpf')
     termo_busca_campus = request.GET.getlist('campus')
     termo_busca_grupos = request.GET.getlist('grupos')
+    termo_busca_ativo = request.GET.get('ativo')
 
     if termo_busca_cpf:
         cpf_limpo = re.sub(r'\D', '', termo_busca_cpf)
@@ -47,7 +48,12 @@ def lista_usuarios(request):
         usuarios = usuarios.filter(
             grupos__id__in=termo_busca_grupos).distinct()
 
-    # Aí filtra o nome via Python já na lista filtrada:
+    if termo_busca_ativo is not None:
+        if termo_busca_ativo.lower() == 'sim':
+            usuarios = usuarios.filter(ativo=True)
+        elif termo_busca_ativo.lower() == 'nao':
+            usuarios = usuarios.filter(ativo=False)
+
     if termo_busca_nome:
         termo_busca_normalizado = remover_acentos(termo_busca_nome).lower()
         usuarios = [
@@ -67,6 +73,7 @@ def lista_usuarios(request):
         'termo_busca_cpf': termo_busca_cpf,
         'termo_busca_campus': termo_busca_campus,
         'termo_busca_grupos': termo_busca_grupos,
+        'ativo_filtro': termo_busca_ativo,  # <-- Adicione isto!
     }
 
     return render(request, 'usuarios/lista_usuarios.html', context)
