@@ -6,6 +6,7 @@ import unicodedata
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.contrib import messages
+from django.views.decorators.http import require_POST
 from unidecode import unidecode
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
@@ -452,7 +453,31 @@ def importar_excel(request):
 @login_required
 def lista_edital(request):
     editais = Edital.objects.all()
-    return render(request, 'lista_editais.html', {'editais': editais})
+
+    termo_nome = request.GET.get('nome')
+    termo_numero = request.GET.get('numero')
+    termo_campus = request.GET.get('campus')
+    termo_ativo = request.GET.get('ativo')
+
+    if termo_ativo is not None:
+        if termo_ativo.lower() == 'sim':
+            editais = editais.filter(ativo=True)
+        elif termo_ativo.lower() == 'nao':
+            editais = editais.filter(ativo=False)
+
+    if termo_nome:
+        editais = editais.filter(nome__icontains=termo_nome)
+
+    if termo_numero:
+        editais = editais.filter(numero__icontains=termo_numero)
+
+    if termo_campus:
+        editais = editais.filter(campus__nome__icontains=termo_campus)
+
+    context = {
+        'editais': editais,
+    }
+    return render(request, 'lista_editais.html', context)
 
 
 @login_required
@@ -495,12 +520,27 @@ def exportar_editais(request):
     ws.title = "Editais"
 
     # Cabeçalhos
-    ws.append(['Nome do Edital', 'Numero', 'Campus'])
-
+    ws.append([
+        'Nome do Edital', 'Numero', 'Campus', 'Avaliadores Historico',
+        'Avaliadores Renda', 'Ativo', 'ID'
+    ])
     # Dados
     for edital in Edital.objects.all():
-        ws.append([edital.nome, edital.numero,
-                  edital.campus.nome if edital.campus else ''])
+        campus_nomes = ", ".join([c.nome for c in edital.campus.all()])
+        avaliadores_historico = ", ".join(
+            [a.nome for a in edital.avaliadores_historico.all()])
+        avaliadores_renda = ", ".join(
+            [a.nome for a in edital.avaliadores_renda.all()])
+
+        ws.append([
+            edital.nome,
+            edital.numero,
+            campus_nomes,
+            avaliadores_historico,
+            avaliadores_renda,
+            edital.ativo,
+            edital.id,
+        ])
 
     response = HttpResponse(
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
@@ -573,3 +613,36 @@ def visualizar_edital_grupo(request, edital_id, grupo_id):
     edital = get_object_or_404(Edital, id=edital_id)
     grupo = get_object_or_404(GrupoTrabalho, id=grupo_id, editais=edital)
     return render(request, 'editais/visualizar_edital_grupo.html', {'edital': edital, 'grupo': grupo})
+
+
+@login_required
+def visualizar_usuario(request, usuario_id):
+    usuario = get_object_or_404(Usuario, pk=usuario_id)
+    return render(request, 'visualizar_usuario.html', {'usuario': usuario})
+
+
+@login_required
+def alternar_ativo_edital(request, edital_id):
+    edital = get_object_or_404(Edital, id=edital_id)
+    edital.ativo = not edital.ativo
+    edital.save()
+
+    if edital.ativo:
+        messages.success(request, "Edital ativado com sucesso.")
+    else:
+        messages.warning(request, "Edital inativado com sucesso.")
+
+    return redirect('lista_editais')
+
+
+@require_POST
+def atualizar_status_editais(request):
+    ids_ativos = request.POST.getlist('ativos')
+    todos_editais = Edital.objects.all()
+
+    for edital in todos_editais:
+        edital.ativo = str(edital.id) in ids_ativos
+        edital.save()
+
+    messages.success(request, "Status dos editais atualizado com sucesso.")
+    return redirect('lista_editais')

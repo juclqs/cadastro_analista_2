@@ -50,6 +50,18 @@ class Usuario(models.Model):
     estado = models.ForeignKey(Estado, on_delete=models.SET_NULL, null=True)
     cep = models.CharField(max_length=8)
     telefone = models.CharField(max_length=11)
+    data_criacao = models.DateTimeField(
+        auto_now_add=True, null=True, blank=True)
+    data_atualizacao = models.DateTimeField(
+        auto_now=True, null=True, blank=True)
+    ativo = models.BooleanField(default=True, null=True, blank=True)
+    recebeu_email = models.BooleanField(default=False, null=True, blank=True)
+    observacoes = models.TextField(null=True, blank=True)
+
+    def clean(self):
+        self.cpf = ''.join(filter(str.isdigit, self.cpf))
+        self.cep = ''.join(filter(str.isdigit, self.cep))
+        self.telefone = ''.join(filter(str.isdigit, self.telefone))
 
     def __str__(self):
         return self.nome
@@ -71,6 +83,12 @@ class Edital(models.Model):
     data_final_analise_renda = models.DateField(null=True, blank=True)
     data_recurso_renda = models.DateField(null=True, blank=True)
     data_final_recurso_renda = models.DateField(null=True, blank=True)
+    ativo = models.BooleanField(default=True, null=True, blank=True)
+    data_criacao = models.DateTimeField(
+        auto_now_add=True, null=True, blank=True)
+    data_atualizacao = models.DateTimeField(
+        auto_now=True, null=True, blank=True)
+    observacoes = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.nome} ({self.numero})"

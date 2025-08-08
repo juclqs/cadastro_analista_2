@@ -74,4 +74,8 @@ urlpatterns = [
          views.selecionar_grupo_trabalho, name='selecionar_grupo_trabalho'),
     path('editais/<int:edital_id>/grupo/<int:grupo_id>/',
          views.visualizar_edital_grupo, name='visualizar_edital_grupo'),
+    path('usuarios/<int:usuario_id>/',
+         views.visualizar_usuario, name='visualizar_usuario'),
+    path('editais/<int:edital_id>/alternar/',
+         views.alternar_ativo_edital, name='alternar_ativo_edital'),
 ]

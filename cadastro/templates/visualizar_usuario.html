@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalhes do Usuário{% endblock %}
+
+{% block content %}
+<h2>Detalhes do Usuário</h2>
+
+<p><strong>Nome:</strong> {{ usuario.nome }}</p>
+<p><strong>Email:</strong> {{ usuario.email }}</p>
+<p><strong>CPF:</strong> {{ usuario.cpf }}</p>
+<p><strong>Campus:</strong>
+    {% if usuario.campus %}
+        {{ usuario.campus.nome }}
+    {% else %}
+        Nenhum campus associado.
+    {% endif %}
+</p>
+<p><strong>Matrícula:</strong> {{ usuario.matricula }}</p>
+<p><strong>Grupos:</strong>
+    {% if usuario.grupos.all %}
+        {% for grupo in usuario.grupos.all %}
+            {{ grupo.nome }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+    {% else %}
+        Nenhum grupo associado.
+    {% endif %}
+<p><strong>Banco:</strong> {{ usuario.banco }}</p>
+<p><strong>Agência:</strong> {{ usuario.agencia }}</p>
+<p><strong>Conta:</strong> {{ usuario.conta }}</p>
+<p><strong>Chave Pix:</strong> {{ usuario.pix }}</p>
+<p><strong>Endereço:</strong> {{ usuario.endereco }}</p>
+<p><strong>Bairro:</strong> {{ usuario.bairro }}</p>
+<p><strong>Telefone:</strong> {{ usuario.telefone }}</p>
+<p><strong>Estado:</strong> {{ usuario.estado }}</p>
+<p><strong>Cidade:</strong> {{ usuario.cidade }}</p>
+<p><strong>CEP:</strong> {{ usuario.cep }}</p>
+<p><strong>Data de Criação:</strong> {{ usuario.data_criacao|date:"d/m/Y H:i" }}</p>
+<p><strong>Última Modificação:</strong> {{ usuario.data_atualizacao|date:"d/m/Y H:i" }}</p>
+<p><strong>Ativo:</strong> {{ usuario.ativo|yesno:"Sim,Não" }}</p>
+<p><strong>Recebeu Email:</strong> {{ usuario.recebeu_email|yesno:"Sim,Não" }}</p>
+<p><strong>Observações:</strong> {{ usuario.observacoes }}</p>
+
+<a href="{% url 'lista_usuarios' %}" class="btn btn-secondary">Voltar para lista</a>
+{% endblock %}

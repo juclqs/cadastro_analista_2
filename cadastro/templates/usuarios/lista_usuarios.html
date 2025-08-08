@@ -33,7 +33,6 @@
                 {% endfor %}
             </select>
         </div>
-
         <div class="col-md-3">
             <label for="grupo" class="form-label">Grupo:</label>
             <select name="grupos" multiple>
@@ -46,7 +45,7 @@
         </div>
 
         <div class="col-12 d-flex gap-2">
-            <button type="submit" class="btn btn-primary">Filtrar</button>
+            <button class="btn btn-outline-secondary" type="submit">Buscar</button>
             <a href="{% url 'lista_usuarios' %}" class="btn btn-secondary">Limpar</a>
         </div>
     </form>
@@ -60,15 +59,8 @@
                     <th>Campus</th>
                     <th>Matrícula</th>
                     <th>Email</th>
-                    <th>Banco</th>
-                    <th>Agência</th>
-                    <th>Conta</th>
-                    <th>Pix</th>
-                    <th>Endereço</th>
-                    <th>Bairro</th>
-                    <th>Cidade</th>
-                    <th>CEP</th>
                     <th>Grupos</th>
+                    <th>Ativo</th>
                     <th>Ações</th>
                 </tr>
             </thead>
@@ -80,14 +72,6 @@
                     <td>{{ usuario.campus.nome }}</td>
                     <td>{{ usuario.matricula }}</td>
                     <td>{{ usuario.email }}</td>
-                    <td>{{ usuario.banco }}</td>
-                    <td>{{ usuario.agencia }}</td>
-                    <td>{{ usuario.conta }}</td>
-                    <td>{{ usuario.pix }}</td>
-                    <td>{{ usuario.endereco }}</td>
-                    <td>{{ usuario.bairro }}</td>
-                    <td>{{ usuario.cidade }}</td>
-                    <td>{{ usuario.cep }}</td>
                     <td>
                         {% for grupo in usuario.grupos.all %}
                         {{ grupo.nome }}{% if not forloop.last %}, {% endif %}
@@ -95,18 +79,53 @@
                         Nenhum
                         {% endfor %}
                     </td>
+                    <td>{{ usuario.ativo|yesno:"Sim,Não" }}</td>
                     <td>
                         <a href="{% url 'editar_usuario' usuario.id %}" class="btn btn-sm btn-warning">Editar</a>
                         <a href="{% url 'excluir_usuario' usuario.id %}" class="btn btn-sm btn-danger"
                             onclick="return confirm('Tem certeza que deseja excluir este usuário?');">
                             Excluir
                         </a>
+                        <a href="{% url 'visualizar_usuario' usuario.id %}" class="btn btn-sm btn-info">Visualizar</a>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
                     <td colspan="15" class="text-center">Nenhum usuário encontrado.</td>
                 </tr>
+                <div class="modal fade" id="userModal{{ usuario.id }}" tabindex="-1"
+                    aria-labelledby="userModalLabel{{ usuario.id }}" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="userModalLabel{{ usuario.id }}">Detalhes do Usuário: {{
+                                    usuario.nome }}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Fechar"></button>
+                            </div>
+                            <div class="modal-body">
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item"><strong>Nome:</strong> {{ usuario.nome }}</li>
+                                    <li class="list-group-item"><strong>CPF:</strong> {{ usuario.cpf }}</li>
+                                    <li class="list-group-item"><strong>Campus:</strong> {{ usuario.campus.nome }}</li>
+                                    <li class="list-group-item"><strong>Matrícula:</strong> {{ usuario.matricula }}</li>
+                                    <li class="list-group-item"><strong>Email:</strong> {{ usuario.email }}</li>
+                                    <li class="list-group-item"><strong>Grupos:</strong>
+                                        {% for grupo in usuario.grupos.all %}
+                                        {{ grupo.nome }}{% if not forloop.last %}, {% endif %}
+                                        {% empty %}
+                                        Nenhum
+                                        {% endfor %}
+                                    </li>
+                                    <!-- Adicione mais campos se quiser -->
+                                </ul>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 {% endfor %}
             </tbody>
         </table>

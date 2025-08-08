@@ -19,17 +19,19 @@
         {% empty %}
             <span class="text-muted">Nenhum campus</span>
         {% endfor %}
+        <p><strong>Data de Criação:</strong> {{ edital.data_criacao|date:"d/m/Y H:i" }}</p>
+        <p><strong>Última Modificação:</strong> {{ edital.ultima_modificacao|date:"d/m/Y H:i" }}</p>
     </p>
 
     <div class="table-responsive mb-4">
-        <h4>Dados de Histórico</h4>
+        <h2 class="mt-4">Dados de Análise de Histórico</h2>
         <table class="table table-bordered table-striped table-hover">
             <thead class="table-dark">
-                <div>
+                <div class="text-end mb-2">
                   <a href="{% url 'exportar_editais' %}" class="btn btn-primary">Exportar para Excel</a>
                 </div>
-                <h4></h4>
                 <tr>
+                    <th>Campus</th>
                     <th>Avaliadores Histórico</th>
                     <th>Data Inicial Análise Histórico</th>
                     <th>Data Final Análise Histórico</th>
@@ -40,9 +42,10 @@
             </thead>
             <tbody>
                 <tr>
+                    <td>{{ edital.campus.all|join:", " }}</td>
                     <td>
                         {% for aval in edital.avaliadores_historico.all %}
-                            {{ aval.nome }}{% if not forloop.last %}, {% endif %}
+                            <span>{{ aval.nome }}</span>{% if not forloop.last %}, {% endif %}
                         {% empty %}
                             <span class="text-muted">Nenhum dado encontrado</span>
                         {% endfor %}
@@ -58,12 +61,16 @@
             </tbody>
         </table>
     </div>
-
     <div class="table-responsive">
-        <h4>Dados de Renda</h4>
+        <h2 class="mt-4">Dados de Análise de Renda</h2>
         <table class="table table-bordered table-striped table-hover">
             <thead class="table-dark">
+                <div class="text-end mb-2">
+                  <a href="{% url 'exportar_editais' %}" class="btn btn-primary">Exportar para Excel</a>
+                </div>
+                <h4></h4>
                 <tr>
+                    <th>Campus</th>
                     <th>Avaliadores Renda</th>
                     <th>Data Inicial Análise Renda</th>
                     <th>Data Final Análise Renda</th>
@@ -74,9 +81,10 @@
             </thead>
             <tbody>
                 <tr>
+                    <td>{{ edital.campus.all|join:", " }}</td>
                     <td>
                         {% for aval in edital.avaliadores_renda.all %}
-                            {{ aval.nome }}{% if not forloop.last %}, {% endif %}
+                            <span>{{ aval.nome }}</span>{% if not forloop.last %}, {% endif %}
                         {% empty %}
                             <span class="text-muted">Nenhum dado encontrado</span>
                         {% endfor %}

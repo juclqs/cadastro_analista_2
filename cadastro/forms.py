@@ -1,5 +1,8 @@
 from django import forms
 from .models import Usuario, Cidade, Estado, Campus, GrupoTrabalho, Edital, GrupoAtendimento
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
+import re
 
 
 class UsuarioForm(forms.ModelForm):
@@ -10,6 +13,7 @@ class UsuarioForm(forms.ModelForm):
             'nome': forms.TextInput(attrs={'class': 'form-control'}),
             'cpf': forms.TextInput(attrs={'class': 'form-control'}),
             'matricula': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
             'endereco': forms.TextInput(attrs={'class': 'form-control'}),
             'chave_pix': forms.TextInput(attrs={'class': 'form-control'}),
             'campus': forms.Select(attrs={'class': 'form-select'}),
@@ -23,6 +27,36 @@ class UsuarioForm(forms.ModelForm):
             'cep': forms.TextInput(attrs={'class': 'form-control'}),
             'telefone': forms.TextInput(attrs={'class': 'form-control'}),
         }
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        try:
+            validate_email(email)
+        except ValidationError:
+            raise forms.ValidationError("Email inválido.")
+        return email
+
+    def clean_cpf(self):
+        cpf = self.cleaned_data.get('cpf')
+
+        # Remove caracteres não numéricos
+        cpf = re.sub(r'\D', '', cpf)
+
+        if len(cpf) != 11:
+            raise forms.ValidationError("CPF deve conter 11 dígitos.")
+
+        # Aqui você pode colocar uma validação mais completa de CPF se quiser.
+        # Por exemplo, cálculo dos dígitos verificadores.
+
+        return cpf
+
+    def clean_cep(self):
+        cep = self.cleaned_data.get('cep')
+        cep = re.sub(r'\D', '', cep)  # Remove tudo que não for número
+
+        if len(cep) != 8:
+            raise forms.ValidationError("CEP deve conter 8 dígitos.")
+        return cep
 
 
 class CidadeForm(forms.ModelForm):
