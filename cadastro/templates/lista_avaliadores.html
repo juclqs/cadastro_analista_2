@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Avaliadores do Edital {{ edital_id }}{% endblock %}
+
+{% block header %}Avaliadores do Edital {{ edital_id }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h4 class="mb-4">Relação de Avaliadores</h4>
+
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>Nome</th>
+                <th>Avaliações</th>
+                <th>Recursos</th>
+                <th>Total Avaliações</th>
+                <th>Valor Unitário</th>
+                <th>Total a Receber</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in dados_tabela %}
+            <tr>
+                <td>{{ item.nome }}</td>
+                <td>{{ item.avaliacoes }}</td>
+                <td>{{ item.recursos }}</td>
+                <td>{{ item.total }}</td>
+                <td>R$ {{ item.valor_unitario|floatformat:2 }}</td>
+                <td>R$ {{ item.total_receber|floatformat:2 }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center">Nenhum avaliador encontrado.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

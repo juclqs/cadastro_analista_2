@@ -35,5 +35,5 @@ class UsuarioAdmin(admin.ModelAdmin):
 
 @admin.register(Edital)
 class EditalAdmin(admin.ModelAdmin):
-    list_display = ('nome', 'numero')
-    search_fields = ('nome',)
+    list_display = ('nome', 'numero', 'ativo')
+    search_fields = ('nome', 'ativo')

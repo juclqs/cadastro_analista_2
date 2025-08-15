@@ -10,7 +10,7 @@ from django.views.decorators.http import require_POST
 from unidecode import unidecode
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
-from .models import Usuario, Campus, GrupoTrabalho, Cidade, Estado, Edital
+from .models import Usuario, Campus, GrupoTrabalho, Cidade, Estado, Edital, Avaliacao
 from .forms import (
     UsuarioForm, CidadeForm, EstadoForm, CampusForm,
     GrupoTrabalhoForm, EditalForm, GrupoAtendimentoForm
@@ -314,7 +314,7 @@ def exportar_usuarios(request):
             'Campus': u.campus.nome,
             'Email': u.email,
             'Endereço': u.endereco,
-            'banco': u.banco,
+            'Banco': u.banco,
             'Agencia': u.agencia,
             'Conta': u.conta,
             'Chave Pix': u.chave_pix,
@@ -323,6 +323,7 @@ def exportar_usuarios(request):
             'Bairro': u.bairro,
             'Cep': u.cep,
             'Telefone': u.telefone,
+            'Ativo': u.ativo,
             'Grupos': ", ".join([g.nome for g in u.grupos.all()])
         })
 
@@ -653,3 +654,298 @@ def atualizar_status_editais(request):
 
     messages.success(request, "Status dos editais atualizado com sucesso.")
     return redirect('lista_editais')
+
+
+@login_required
+def importar_estados(request):
+    if request.method == 'POST' and request.FILES.get('arquivo_excel'):
+        arquivo_excel = request.FILES['arquivo_excel']
+
+        try:
+            df = pd.read_excel(arquivo_excel)  # Lê a planilha
+            for _, row in df.iterrows():
+                nome_estado = row['Nome'].strip()
+                if not Estado.objects.filter(nome=nome_estado).exists():
+                    Estado.objects.create(nome=nome_estado)
+
+            messages.success(request, 'Importação realizada com sucesso!')
+        except Exception as e:
+            messages.error(request, f'Erro ao importar: {str(e)}')
+
+        return redirect('lista_estados')
+
+    return render(request, 'importar_estados.html')
+
+
+@login_required
+def importar_cidades(request):
+    if request.method == 'POST' and request.FILES.get('arquivo_excel'):
+        arquivo_excel = request.FILES['arquivo_excel']
+
+        try:
+            df = pd.read_excel(arquivo_excel)  # Lê o Excel
+
+            for _, row in df.iterrows():
+                nome_cidade = str(row['Nome']).strip()
+                nome_estado = str(row['Estado']).strip()
+
+                # Busca o estado correspondente
+                estado = Estado.objects.filter(
+                    nome__iexact=nome_estado).first()
+                if not estado:
+                    messages.warning(
+                        request, f"Estado '{nome_estado}' não encontrado. Cidade '{nome_cidade}' ignorada.")
+                    continue
+
+                # Cria a cidade se ainda não existir no mesmo estado
+                if not Cidade.objects.filter(nome=nome_cidade, estado=estado).exists():
+                    Cidade.objects.create(nome=nome_cidade, estado=estado)
+
+            messages.success(request, 'Cidades importadas com sucesso!')
+
+        except Exception as e:
+            messages.error(request, f'Erro ao importar: {str(e)}')
+
+        return redirect('lista_cidades')
+
+    return render(request, 'importar_cidades.html')
+
+
+@login_required
+def importar_campus(request):
+    if request.method == 'POST' and request.FILES.get('arquivo_excel'):
+        arquivo_excel = request.FILES['arquivo_excel']
+
+        try:
+            df = pd.read_excel(arquivo_excel)  # Lê a planilha
+
+            for _, row in df.iterrows():
+                nome_campus = str(row['Nome']).strip()
+                sigla_campus = str(row['Sigla']).strip()
+                cidade_nome = str(row['Cidade']).strip()
+
+                cidade_obj = Cidade.objects.filter(
+                    nome__iexact=cidade_nome).first()
+
+                if not cidade_obj:
+                    messages.warning(
+                        request, f"Cidade '{cidade_nome}' não encontrada para o campus '{nome_campus}'. Linha ignorada.")
+                    continue  # pula para próxima linha
+
+                campus = Campus.objects.filter(
+                    sigla__iexact=sigla_campus).first()
+
+                if campus:
+                    # Atualiza o campus se cidade for diferente
+                    if campus.cidade != cidade_obj:
+                        campus.cidade = cidade_obj
+                        campus.nome = nome_campus  # opcional, caso queira atualizar nome também
+                        campus.save()
+                else:
+                    # Cria campus com cidade associada
+                    Campus.objects.create(
+                        nome=nome_campus,
+                        sigla=sigla_campus,
+                        cidade=cidade_obj
+                    )
+
+            messages.success(request, 'Campi importados com sucesso!')
+
+        except Exception as e:
+            messages.error(request, f'Erro ao importar: {str(e)}')
+
+        return redirect('lista_campus')
+
+    return render(request, 'importar_campus.html')
+
+
+def normalizar(texto):
+    """Remove acentos, converte para minúsculas e tira espaços extras."""
+    if pd.isna(texto):
+        return ''
+    texto = str(texto).strip().lower()
+    return ''.join(c for c in unicodedata.normalize('NFKD', texto) if not unicodedata.combining(c))
+
+
+@login_required
+def importar_usuarios(request):
+    if request.method == 'POST' and request.FILES.get('arquivo_excel'):
+        arquivo_excel = request.FILES['arquivo_excel']
+
+        try:
+            df = pd.read_excel(arquivo_excel)
+
+            # Normaliza o nome das colunas
+            df.columns = [normalizar(col) for col in df.columns]
+
+            for _, row in df.iterrows():
+                nome = str(row.get('nome', '')).strip()
+                cpf = str(row.get('cpf', '')).strip()
+                matricula = str(row.get('matricula', '')).strip()
+                email = str(row.get('email', '')).strip()
+                endereco = str(row.get('endereco', '')).strip()
+                chave_pix = str(row.get('chave pix', '')).strip()
+
+                # Campus
+                campus_nome = str(row.get('campus', '')).strip()
+                campus, _ = Campus.objects.get_or_create(
+                    nome__iexact=campus_nome, defaults={'nome': campus_nome})
+
+                # Grupos (aceita vírgula ou ;)
+                grupos_nomes = str(row.get('grupos', '')).replace(
+                    ';', ',').split(',')
+                grupos = []
+                for gnome in grupos_nomes:
+                    gnome = gnome.strip()
+                    if not gnome:
+                        continue
+                    grupo, _ = GrupoTrabalho.objects.get_or_create(
+                        nome__iexact=gnome, defaults={'nome': gnome})
+                    grupos.append(grupo)
+
+                banco = str(row.get('banco', '')).strip()
+                agencia = str(row.get('agencia', '')).strip()
+                conta = str(row.get('conta', '')).strip()
+                bairro = str(row.get('bairro', '')).strip()
+
+                # Estado e Cidade
+                estado_nome = str(row.get('estado', '')).strip()
+                estado, _ = Estado.objects.get_or_create(
+                    nome__iexact=estado_nome, defaults={'nome': estado_nome})
+
+                cidade_nome = str(row.get('cidade', '')).strip()
+                cidade, _ = Cidade.objects.get_or_create(nome__iexact=cidade_nome, estado=estado, defaults={
+                                                         'nome': cidade_nome, 'estado': estado})
+
+                cep = str(row.get('cep', '')).strip()
+                telefone = str(row.get('telefone', '')).strip()
+                ativo = True if str(row.get('ativo', '')).lower() in [
+                    'sim', 'yes', 'true', '1'] else False
+                recebeu_email = True if str(row.get('recebeu email', '')).lower() in [
+                    'sim', 'yes', 'true', '1'] else False
+
+                # Observações (aceita singular/plural)
+                observacoes = ''
+                if 'observacoes' in df.columns:
+                    observacoes = str(row.get('observacoes', '')).strip()
+                elif 'observacao' in df.columns:
+                    observacoes = str(row.get('observacao', '')).strip()
+
+                # Cria ou atualiza usuário
+                usuario, _ = Usuario.objects.update_or_create(
+                    cpf=cpf,
+                    defaults={
+                        'nome': nome,
+                        'matricula': matricula,
+                        'email': email,
+                        'endereco': endereco,
+                        'chave_pix': chave_pix,
+                        'campus': campus,
+                        'banco': banco,
+                        'agencia': agencia,
+                        'conta': conta,
+                        'bairro': bairro,
+                        'cidade': cidade,
+                        'estado': estado,
+                        'cep': cep,
+                        'telefone': telefone,
+                        'ativo': ativo,
+                        'recebeu_email': recebeu_email,
+                        'observacoes': observacoes,
+                    }
+                )
+                usuario.grupos.set(grupos)
+
+            messages.success(
+                request, 'Importação de usuários realizada com sucesso!')
+
+        except Exception as e:
+            messages.error(request, f'Erro ao importar: {str(e)}')
+
+        return redirect('lista_usuarios')
+
+    return render(request, 'importar_usuarios.html')
+
+
+@login_required
+def lista_avaliadores(request, edital_id):
+    VALOR_POR_AVALIACAO = 5.20
+
+    avaliadores = Usuario.objects.filter(
+        avaliacao__edital_id=edital_id
+    ).distinct()
+
+    dados_tabela = []
+
+    for avaliador in avaliadores:
+        qtd_avaliacoes = Avaliacao.objects.filter(
+            avaliador=avaliador,
+            edital_id=edital_id,
+            tipo="analise"
+        ).count()
+
+        qtd_recursos = Avaliacao.objects.filter(
+            avaliador=avaliador,
+            edital_id=edital_id,
+            tipo="recurso"
+        ).count()
+
+        total = qtd_avaliacoes + qtd_recursos
+        total_receber = total * VALOR_POR_AVALIACAO
+
+        dados_tabela.append({
+            "nome": avaliadores.get_full_name(),  # ou username, dependendo do seu model
+            "avaliacoes": qtd_avaliacoes,
+            "recursos": qtd_recursos,
+            "total": total,
+            "valor_unitario": VALOR_POR_AVALIACAO,
+            "total_receber": total_receber,
+        })
+
+    return render(request, "cadastro/lista_avaliadores.html", {
+        "dados_tabela": dados_tabela,
+        "edital_id": edital_id
+    })
+
+
+@login_required
+def detalhes_edital(request, edital_id):
+    edital = get_object_or_404(Edital, id=edital_id)
+
+    VALOR_POR_AVALIACAO = 5.20
+
+    avaliadores = Usuario.objects.filter(
+        avaliacao__edital_id=edital_id
+    ).distinct()
+
+    dados_tabela = []
+
+    for avaliador in avaliadores:
+        qtd_avaliacoes = Avaliacao.objects.filter(
+            avaliador=avaliador,
+            edital_id=edital_id,
+            tipo="analise"
+        ).count()
+
+        qtd_recursos = Avaliacao.objects.filter(
+            avaliador=avaliador,
+            edital_id=edital_id,
+            tipo="recurso"
+        ).count()
+
+        total = qtd_avaliacoes + qtd_recursos
+        total_receber = total * VALOR_POR_AVALIACAO
+
+        dados_tabela.append({
+            "nome": avaliador.get_full_name(),  # ou username, ou nome
+            "avaliacoes": qtd_avaliacoes,
+            "recursos": qtd_recursos,
+            "total": total,
+            "valor_unitario": VALOR_POR_AVALIACAO,
+            "total_receber": total_receber,
+        })
+
+    return render(request, 'cadastro/selecionar_grupo_trabalho.html', {
+        'edital': edital,
+        'dados_tabela': dados_tabela
+    })

@@ -101,3 +101,10 @@ class GrupoAtendimento(models.Model):
 
     def __str__(self):
         return self.nome
+
+
+class Avaliacao(models.Model):
+    avaliador = models.ForeignKey(Usuario, on_delete=models.CASCADE)
+    edital = models.ForeignKey(Edital, on_delete=models.CASCADE)
+    tipo = models.CharField(max_length=20, choices=[(
+        "analise", "Análise"), ("recurso", "Recurso")])

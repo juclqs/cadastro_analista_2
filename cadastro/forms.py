@@ -129,3 +129,7 @@ class GrupoAtendimentoForm(forms.ModelForm):
     class Meta:
         model = GrupoAtendimento
         fields = ['nome']
+
+
+class FiltroAvaliadorForm(forms.Form):
+    edital = forms.ModelChoiceField(queryset=Edital.objects.all())

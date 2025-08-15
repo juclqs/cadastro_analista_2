@@ -78,4 +78,10 @@ urlpatterns = [
          views.visualizar_usuario, name='visualizar_usuario'),
     path('editais/<int:edital_id>/alternar/',
          views.alternar_ativo_edital, name='alternar_ativo_edital'),
+    path('importar-estados/', views.importar_estados, name='importar_estados'),
+    path('importar-cidades/', views.importar_cidades, name='importar_cidades'),
+    path('importar-campi/', views.importar_campus, name='importar_campi'),
+    path('importar-usuarios/', views.importar_usuarios, name='importar_usuarios'),
+    path('lista_avaliadores/<int:edital_id>/',
+         views.lista_avaliadores, name='lista_avaliadores')
 ]
