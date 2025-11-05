@@ -109,6 +109,41 @@
    
     <div class="container mt-4">
     <h4 class="mt-5">Tabela de Avaliadores</h4>
+
+    <form method="post" action="{% url 'salvar_avaliacoes' edital.id %}">
+    {% csrf_token %}
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped table-hover mt-3">
+            <thead class="table-dark">
+                <tr>
+                    <th>Avaliador</th>
+                    <th>Grupo</th>
+                    <th>Qtd. Avaliações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for avaliador in avaliadores %}
+                <tr>
+                    <td>{{ avaliador.usuario.nome }}</td>
+                    <td>{{ avaliador.grupo.nome }}</td>
+                    <td>
+                        <input type="number"
+                               name="avaliacoes_{{ avaliador.id }}"
+                               value="{{ avaliador.qtd_avaliacoes }}"
+                               class="form-control"
+                               min="0">
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="text-center text-muted">Nenhum avaliador encontrado.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <button type="submit" class="btn btn-success">Salvar Quantidades</button>
+</form>
 </div>
 {% endblock %}
 

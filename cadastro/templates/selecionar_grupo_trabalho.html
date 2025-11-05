@@ -13,6 +13,9 @@
     <h3>Detalhes do Edital: {{ edital.nome }}</h3>
     <p>
         <strong>Número:</strong> {{ edital.numero }}<br>
+        <strong>Ano:</strong> {{ edital.ano }}<br>
+        <strong>Valor Unitário por Avaliação de histórico (R$):</strong> {{ edital.valor_unitario_avaliacao }}<br>
+        <strong>Valor Unitário por Avaliação de renda (R$):</strong> {{ edital.valor_unitario_renda }}<br>
         <strong>Campus:</strong>
         {% for c in edital.campus.all %}
             {{ c.nome }}{% if not forloop.last %}, {% endif %}
@@ -23,142 +26,180 @@
         <p><strong>Última Modificação:</strong> {{ edital.ultima_modificacao|date:"d/m/Y H:i" }}</p>
     </p>
 
+    <!-- =================== ANÁLISE DE HISTÓRICO =================== -->
     <div class="table-responsive mb-4">
         <h2 class="mt-4">Dados de Análise de Histórico</h2>
         <table class="table table-bordered table-striped table-hover">
             <thead class="table-dark">
-                <div class="text-end mb-2">
-                  <a href="{% url 'exportar_editais' %}" class="btn btn-primary">Exportar para Excel</a>
-                </div>
                 <tr>
-                    <th>Campus</th>
-                    <th>Avaliadores Histórico</th>
-                    <th>Data Inicial Análise Histórico</th>
-                    <th>Data Final Análise Histórico</th>
-                    <th>Data Recurso Histórico</th>
-                    <th>Data Final Recurso Histórico</th>
+                    <th>Data Inicial</th>
+                    <th>Data Final</th>
+                    <th>Data Recurso</th>
+                    <th>Data Final Recurso</th>
                     <th>Ações</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td>{{ edital.campus.all|join:", " }}</td>
-                    <td>
-                        {% for aval in edital.avaliadores_historico.all %}
-                            <span>{{ aval.nome }}</span>{% if not forloop.last %}, {% endif %}
-                        {% empty %}
-                            <span class="text-muted">Nenhum dado encontrado</span>
-                        {% endfor %}
-                    </td>
                     <td>{{ edital.data_inicial_analise_historico|date:"d/m/Y" }}</td>
                     <td>{{ edital.data_final_analise_historico|date:"d/m/Y" }}</td>
                     <td>{{ edital.data_recurso_historico|date:"d/m/Y" }}</td>
                     <td>{{ edital.data_final_recurso_historico|date:"d/m/Y" }}</td>
-                    <td>
-                        <a href="{% url 'editar_edital' edital.id %}" class="btn btn-sm btn-warning">Editar</a>
-                    </td>
+                    <td><a href="{% url 'editar_edital' edital.id %}" class="btn btn-sm btn-warning">Editar</a></td>
                 </tr>
             </tbody>
         </table>
 
-        <table class="table table-bordered table-striped">
-        <thead class="table-dark">
-            <tr>
-                <th>Nome</th>
-                <th>Avaliações</th>
-                <th>Recursos</th>
-                <th>Total Avaliações</th>
-                <th>Valor Unitário</th>
-                <th>Total a Receber</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in dados_tabela %}
-            <tr>
-                <td>{{ item.nome }}</td>
-                <td>{{ item.avaliacoes }}</td>
-                <td>{{ item.recursos }}</td>
-                <td>{{ item.total }}</td>
-                <td>R$ {{ item.valor_unitario|floatformat:2 }}</td>
-                <td>R$ {{ item.total_receber|floatformat:2 }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="6" class="text-center">Nenhum avaliador encontrado.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-
+        <!-- BOTÃO DE EXPORTAÇÃO HISTÓRICO -->
+        <div class="text-end mb-2">
+            <button id="exportarHistorico" class="btn btn-success">Exportar Pagamentos (Histórico)</button>
+        </div>
+    
+        <!-- TABELA DE PAGAMENTO HISTÓRICO -->
+        <table id="tabela-historico" class="table table-bordered table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>Avaliador</th>
+                    <th>Avaliações</th>
+                    <th>Recursos</th>
+                    <th>Total</th>
+                    <th>Valor Unitário (R$)</th>
+                    <th>Total a Receber</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for aval in edital.avaliadores_historico.all %}
+                <tr>
+                    <td>{{ aval.nome }}</td>
+                    <td><input type="number" class="form-control avaliacoes" min="0" value="0"></td>
+                    <td><input type="number" class="form-control recursos" min="0" value="0"></td>
+                    <td class="total">0</td>
+                    <td><input type="number" class="form-control valor-unitario" value="{{ edital.valor_unitario_avaliacao }}"></td>
+                    <td class="total-receber">R$ 0,00</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
-    <div class="table-responsive">
+
+    <!-- =================== ANÁLISE DE RENDA =================== -->
+    <div class="table-responsive mb-4">
         <h2 class="mt-4">Dados de Análise de Renda</h2>
         <table class="table table-bordered table-striped table-hover">
             <thead class="table-dark">
-                <div class="text-end mb-2">
-                  <a href="{% url 'exportar_editais' %}" class="btn btn-primary">Exportar para Excel</a>
-                </div>
-                <h4></h4>
                 <tr>
-                    <th>Campus</th>
-                    <th>Avaliadores Renda</th>
-                    <th>Data Inicial Análise Renda</th>
-                    <th>Data Final Análise Renda</th>
-                    <th>Data Recurso Renda</th>
-                    <th>Data Final Recurso Renda</th>
+                    <th>Data Inicial</th>
+                    <th>Data Final</th>
+                    <th>Data Recurso</th>
+                    <th>Data Final Recurso</th>
                     <th>Ações</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td>{{ edital.campus.all|join:", " }}</td>
-                    <td>
-                        {% for aval in edital.avaliadores_renda.all %}
-                            <span>{{ aval.nome }}</span>{% if not forloop.last %}, {% endif %}
-                        {% empty %}
-                            <span class="text-muted">Nenhum dado encontrado</span>
-                        {% endfor %}
-                    </td>
                     <td>{{ edital.data_inicial_analise_renda|date:"d/m/Y" }}</td>
                     <td>{{ edital.data_final_analise_renda|date:"d/m/Y" }}</td>
                     <td>{{ edital.data_recurso_renda|date:"d/m/Y" }}</td>
                     <td>{{ edital.data_final_recurso_renda|date:"d/m/Y" }}</td>
-                    <td>
-                        <a href="{% url 'editar_edital' edital.id %}" class="btn btn-sm btn-warning">Editar</a>
-                    </td>
+                    <td><a href="{% url 'editar_edital' edital.id %}" class="btn btn-sm btn-warning">Editar</a></td>
                 </tr>
             </tbody>
         </table>
 
-        <table class="table table-bordered table-striped">
-        <thead class="table-dark">
-            <tr>
-                <th>Nome</th>
-                <th>Avaliações</th>
-                <th>Recursos</th>
-                <th>Total Avaliações</th>
-                <th>Valor Unitário</th>
-                <th>Total a Receber</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in dados_tabela %}
-            <tr>
-                <td>{{ item.nome }}</td>
-                <td>{{ item.avaliacoes }}</td>
-                <td>{{ item.recursos }}</td>
-                <td>{{ item.total }}</td>
-                <td>R$ {{ item.valor_unitario|floatformat:2 }}</td>
-                <td>R$ {{ item.total_receber|floatformat:2 }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="6" class="text-center">Nenhum avaliador encontrado.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+        <!-- BOTÃO DE EXPORTAÇÃO RENDA -->
+        <div class="text-end mb-2">
+            <button id="exportarRenda" class="btn btn-success">Exportar Pagamentos (Renda)</button>
+        </div>
+
+        <!-- TABELA DE PAGAMENTO RENDA -->
+        <table id="tabela-renda" class="table table-bordered table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>Avaliador</th>
+                    <th>Avaliações</th>
+                    <th>Recursos</th>
+                    <th>Total</th>
+                    <th>Valor Unitário (R$)</th>
+                    <th>Total a Receber</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for aval in edital.avaliadores_renda.all %}
+                <tr>
+                    <td>{{ aval.nome }}</td>
+                    <td><input type="number" class="form-control avaliacoes" min="0" value="0"></td>
+                    <td><input type="number" class="form-control recursos" min="0" value="0"></td>
+                    <td class="total">0</td>
+                    <td><input type="number" class="form-control valor-unitario" value="{{ edital.valor_unitario_renda }}"></td>
+                    <td class="total-receber">R$ 0,00</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
+
+<!-- =================== SCRIPT =================== -->
+<script>
+function atualizarTotais() {
+    document.querySelectorAll('table tbody tr').forEach(row => {
+        const avaliacoes = parseInt(row.querySelector('.avaliacoes')?.value) || 0;
+        const recursos = parseInt(row.querySelector('.recursos')?.value) || 0;
+        const valor = parseFloat(row.querySelector('.valor-unitario')?.value.replace(',', '.')) || 0;
+
+        const total = avaliacoes + recursos;
+        const totalReceber = total * valor;
+        console.log(
+            avaliacoes,
+            recursos,
+            valor,
+            total,
+            totalReceber
+        );
+        if (row.querySelector('.total')) row.querySelector('.total').textContent = total;
+        if (row.querySelector('.total-receber'))
+            row.querySelector('.total-receber').textContent = 'R$ ' + totalReceber.toFixed(2).replace('.', ',');
+    });
+}
+
+document.addEventListener('input', atualizarTotais);
+
+// Função de exportar (reutilizável)
+function exportarTabela(tabelaId, url) {
+    const rows = document.querySelectorAll(`#${tabelaId} tbody tr`);
+    const dados = [];
+    rows.forEach(row => {
+        const nome = row.querySelector('td:first-child').textContent.trim();
+        const avaliacoes = parseInt(row.querySelector('.avaliacoes')?.value) || 0;
+        const recursos = parseInt(row.querySelector('.recursos')?.value) || 0;
+        const valorUnitario = parseFloat(row.querySelector('.valor-unitario')?.value) || 0;
+        const total = avaliacoes + recursos;
+        const totalReceber = total * valorUnitario;
+        dados.push({ nome, avaliacoes, recursos, total, valorUnitario, totalReceber });
+    });
+
+    fetch(url, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: JSON.stringify(dados)
+    })
+    .then(response => response.blob())
+    .then(blob => {
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = tabelaId + ".xlsx";
+        a.click();
+    });
+}
+
+document.getElementById('exportarHistorico').addEventListener('click', () =>
+    exportarTabela('tabela-historico', "{% url 'exportar_pagamentos' edital.id %}")
+);
+document.getElementById('exportarRenda').addEventListener('click', () =>
+    exportarTabela('tabela-renda', "{% url 'exportar_pagamentos' edital.id %}")
+);
+</script>
 {% endblock %}

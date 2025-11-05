@@ -2,17 +2,23 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    # Página inicial → lista de usuários
-    path('usuarios/', views.lista_usuarios, name='lista_usuarios'),
+    # Dashboard / Página inicial
     path('', views.dashboard, name='dashboard'),
 
-    # CRUD Usuários
+    # Usuários
+    path('usuarios/', views.lista_usuarios, name='lista_usuarios'),
     path('usuarios/novo/', views.adicionar_usuario, name='adicionar_usuario'),
+    path('usuarios/<int:usuario_id>/',
+         views.visualizar_usuario, name='visualizar_usuario'),
     path('usuarios/<int:usuario_id>/editar/',
          views.editar_usuario, name='editar_usuario'),
     path('usuarios/<int:usuario_id>/excluir/',
          views.excluir_usuario, name='excluir_usuario'),
     path('usuarios/exportar/', views.exportar_usuarios, name='exportar_usuarios'),
+
+    # Usuários → ligação com edital
+    path('usuarios/editais/<int:edital_id>/',
+         views.visualizar_edital, name='visualizar_edital'),
 
     # Cadastro de entidades auxiliares
     path('cadastro/campus/', views.adicionar_campus, name='cadastro_campus'),
@@ -26,7 +32,7 @@ urlpatterns = [
     path('lista/estados/', views.lista_estados, name='lista_estados'),
     path('lista/editais/', views.lista_edital, name='lista_editais'),
 
-    # (opcional) Formulário isolado de cidade
+    # CRUD Cidades
     path('cidades/adicionar/', views.adicionar_cidade, name='adicionar_cidade'),
     path('cidades/<int:cidade_id>/editar/',
          views.editar_cidade, name='editar_cidade'),
@@ -34,7 +40,7 @@ urlpatterns = [
          views.excluir_cidade, name='excluir_cidade'),
     path('cidades/exportar/', views.exportar_cidades, name='exportar_cidades'),
 
-    # (opcional) Formulário isolado de estado
+    # CRUD Estados
     path('estados/adicionar/', views.adicionar_estado, name='adicionar_estados'),
     path('estados/<int:estado_id>/editar/',
          views.editar_estado, name='editar_estados'),
@@ -42,6 +48,7 @@ urlpatterns = [
          views.excluir_estado, name='excluir_estados'),
     path('estados/exportar/', views.exportar_estados, name='exportar_estados'),
 
+    # CRUD Campus
     path('campus/adicionar/', views.adicionar_campus, name='adicionar_campus'),
     path('campus/<int:campus_id>/editar/',
          views.editar_campus, name='editar_campus'),
@@ -49,6 +56,7 @@ urlpatterns = [
          views.excluir_campus, name='excluir_campus'),
     path('campus/exportar/', views.exportar_campus, name='exportar_campus'),
 
+    # CRUD Grupos
     path('grupos/adicionar/', views.adicionar_grupo, name='adicionar_grupo'),
     path('grupos/<int:grupo_id>/editar/',
          views.editar_grupo, name='editar_grupo'),
@@ -56,32 +64,38 @@ urlpatterns = [
          views.excluir_grupo, name='excluir_grupo'),
     path('grupos/exportar/', views.exportar_grupos, name='exportar_grupos'),
 
+    # CRUD Editais
     path('editais/adicionar/', views.adicionar_edital, name='adicionar_edital'),
     path('editais/<int:edital_id>/editar/',
          views.editar_edital, name='editar_edital'),
     path('editais/<int:edital_id>/excluir/',
          views.excluir_edital, name='excluir_edital'),
     path('editais/exportar/', views.exportar_editais, name='exportar_editais'),
-    path('edital/<int:id>/importar_equipe/',
-         views.importar_equipe_edital, name='importar_equipe_edital'),
-    path('editais/<int:edital_id>/adicionar-grupo/',
-         views.adicionar_grupo_atendimento, name='adicionar_grupo_atendimento'),
     path('editais/<int:edital_id>/',
          views.visualizar_edital, name='visualizar_edital'),
-    path('usuarios/editais/<int:edital_id>/',
-         views.visualizar_edital, name='visualizar_edital'),
+    path('editais/<int:edital_id>/alternar/',
+         views.alternar_ativo_edital, name='alternar_ativo_edital'),
+
+    # Editais - grupos e equipe
+    path('editais/<int:edital_id>/adicionar-grupo/',
+         views.adicionar_grupo_atendimento, name='adicionar_grupo_atendimento'),
     path('editais/<int:edital_id>/grupos/',
          views.selecionar_grupo_trabalho, name='selecionar_grupo_trabalho'),
     path('editais/<int:edital_id>/grupo/<int:grupo_id>/',
          views.visualizar_edital_grupo, name='visualizar_edital_grupo'),
-    path('usuarios/<int:usuario_id>/',
-         views.visualizar_usuario, name='visualizar_usuario'),
-    path('editais/<int:edital_id>/alternar/',
-         views.alternar_ativo_edital, name='alternar_ativo_edital'),
+    path('editais/<int:edital_id>/importar_equipe/',
+         views.importar_equipe_edital, name='importar_equipe_edital'),
+
+    # Importações gerais
     path('importar-estados/', views.importar_estados, name='importar_estados'),
     path('importar-cidades/', views.importar_cidades, name='importar_cidades'),
     path('importar-campi/', views.importar_campus, name='importar_campi'),
     path('importar-usuarios/', views.importar_usuarios, name='importar_usuarios'),
+
+    # Outras rotas específicas
     path('lista_avaliadores/<int:edital_id>/',
-         views.lista_avaliadores, name='lista_avaliadores')
+         views.lista_avaliadores, name='lista_avaliadores'),
+
+    path('editais/<int:edital_id>/exportar_pagamentos/',
+         views.exportar_pagamentos, name='exportar_pagamentos'),
 ]

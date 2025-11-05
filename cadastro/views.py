@@ -1,14 +1,19 @@
 import re
 from unidecode import unidecode
 import pandas as pd
+import json
 import openpyxl
 import unicodedata
+from io import BytesIO
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.contrib import messages
+from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from unidecode import unidecode
 from django.db.models import Q
+from openpyxl import Workbook
+from openpyxl.styles import Font, Alignment, Border, Side
 from django.contrib.auth.decorators import login_required
 from .models import Usuario, Campus, GrupoTrabalho, Cidade, Estado, Edital, Avaliacao
 from .forms import (
@@ -29,7 +34,7 @@ def remover_acentos(texto):
 
 @login_required
 def lista_usuarios(request):
-    usuarios = Usuario.objects.all()
+    usuarios = Usuario.objects.all().order_by('nome')
 
     termo_busca_nome = request.GET.get('nome')
     termo_busca_cpf = request.GET.get('cpf')
@@ -73,7 +78,8 @@ def lista_usuarios(request):
         'termo_busca_cpf': termo_busca_cpf,
         'termo_busca_campus': termo_busca_campus,
         'termo_busca_grupos': termo_busca_grupos,
-        'ativo_filtro': termo_busca_ativo,  # <-- Adicione isto!
+        'ativo_filtro': termo_busca_ativo,
+        'total_usuarios': len(usuarios),
     }
 
     return render(request, 'usuarios/lista_usuarios.html', context)
@@ -115,7 +121,7 @@ def excluir_usuario(request, usuario_id):
 
 @login_required
 def lista_cidades(request):
-    cidades = Cidade.objects.all()
+    cidades = Cidade.objects.all().order_by('nome')
 
     # Adicionar o filtro
     termo_busca_nome = request.GET.get('nome')
@@ -178,7 +184,7 @@ def excluir_cidade(request, cidade_id):
 
 @login_required
 def lista_estados(request):
-    estados = Estado.objects.all()
+    estados = Estado.objects.all().order_by('nome')
     return render(request, 'lista_estados.html', {'estados': estados})
 
 
@@ -218,7 +224,7 @@ def excluir_estado(request, estado_id):
 
 @login_required
 def lista_campus(request):
-    campus = Campus.objects.all()
+    campus = Campus.objects.all().order_by('nome')
     return render(request, 'lista_campus.html', {'campus': campus})
 
 
@@ -460,10 +466,11 @@ def importar_excel(request):
 # ==================== EDITAIS ====================
 @login_required
 def lista_edital(request):
-    editais = Edital.objects.all()
+    editais = Edital.objects.all().order_by('ano')
 
     termo_nome = request.GET.get('nome')
     termo_numero = request.GET.get('numero')
+    termo_ano = request.GET.get('ano')
     termo_campus = request.GET.get('campus')
     termo_ativo = request.GET.get('ativo')
 
@@ -478,6 +485,9 @@ def lista_edital(request):
 
     if termo_numero:
         editais = editais.filter(numero__icontains=termo_numero)
+
+    if termo_ano:
+        editais = editais.filter(ano__icontains=termo_ano)
 
     if termo_campus:
         editais = editais.filter(campus__nome__icontains=termo_campus)
@@ -570,7 +580,16 @@ def visualizar_edital(request, edital_id):
     else:
         form = EditalForm(instance=edital)
 
-    return render(request, 'visualizar_edital.html', {'form': form, 'edital': edital})
+    # 🔹 adicionando avaliadores de histórico e renda:
+    avaliadores_historico = edital.avaliadores_historico.all()
+    avaliadores_renda = edital.avaliadores_renda.all()
+
+    return render(request, 'visualizar_edital.html', {
+        'form': form,
+        'edital': edital,
+        'avaliadores_historico': avaliadores_historico,
+        'avaliadores_renda': avaliadores_renda,
+    })
 
 
 @login_required
@@ -912,7 +931,7 @@ def lista_avaliadores(request, edital_id):
 def detalhes_edital(request, edital_id):
     edital = get_object_or_404(Edital, id=edital_id)
 
-    VALOR_POR_AVALIACAO = 5.20
+    VALOR_POR_AVALIACAO = valor_unitario_avaliacao
 
     avaliadores = Usuario.objects.filter(
         avaliacao__edital_id=edital_id
@@ -937,7 +956,7 @@ def detalhes_edital(request, edital_id):
         total_receber = total * VALOR_POR_AVALIACAO
 
         dados_tabela.append({
-            "nome": avaliador.get_full_name(),  # ou username, ou nome
+            "nome": avaliador.get_full_name(),
             "avaliacoes": qtd_avaliacoes,
             "recursos": qtd_recursos,
             "total": total,
@@ -949,3 +968,67 @@ def detalhes_edital(request, edital_id):
         'edital': edital,
         'dados_tabela': dados_tabela
     })
+
+
+@login_required
+def exportar_pagamentos(request, edital_id):
+    if request.method == "POST":
+        # Recebe dados JSON
+        dados_json = json.loads(request.body)
+
+        # Cria a planilha
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Pagamentos"
+
+        # Cabeçalho com estilos
+        header = ['Avaliador', 'Avaliações', 'Recursos', 'Total',
+                  'Valor Unitário (R$)', 'Total a Receber (R$)']
+        bold_font = Font(bold=True)
+        for col_num, coluna in enumerate(header, 1):
+            cell = ws.cell(row=1, column=col_num, value=coluna)
+            cell.font = bold_font
+            cell.alignment = Alignment(horizontal='center')
+
+        # Bordas simples
+        thin_border = Border(left=Side(style='thin'), right=Side(style='thin'),
+                             top=Side(style='thin'), bottom=Side(style='thin'))
+
+        # Preenche dados recebidos
+        for i, linha in enumerate(dados_json, start=2):
+            ws.cell(row=i, column=1, value=linha['nome']).border = thin_border
+            ws.cell(row=i, column=2,
+                    value=linha['avaliacoes']).border = thin_border
+            ws.cell(row=i, column=3,
+                    value=linha['recursos']).border = thin_border
+            ws.cell(row=i, column=4, value=linha['total']).border = thin_border
+            ws.cell(row=i, column=5,
+                    value=linha['valorUnitario']).border = thin_border
+            ws.cell(row=i, column=6,
+                    value=linha['totalReceber']).border = thin_border
+
+        # Ajusta largura das colunas (opcional)
+        for col in ws.columns:
+            max_length = max(len(str(cell.value or "")) for cell in col)
+            col_letter = col[0].column_letter
+            ws.column_dimensions[col_letter].width = max_length + 2
+
+        # Resposta HTTP com o arquivo XLSX
+        response = HttpResponse(
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        )
+        response['Content-Disposition'] = 'attachment; filename=pagamentos_edital_{}.xlsx'.format(
+            edital_id)
+        output = BytesIO()
+        wb.save(output)
+        output.seek(0)
+
+        response = HttpResponse(
+            output.getvalue(),
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        )
+        response['Content-Disposition'] = f'attachment; filename=pagamentos_edital_{edital_id}.xlsx'
+
+        return response
+    else:
+        return HttpResponse(status=405)  # Método não permitido se não for POST

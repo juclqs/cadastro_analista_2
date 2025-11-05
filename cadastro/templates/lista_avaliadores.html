@@ -26,7 +26,7 @@
                 <td>{{ item.avaliacoes }}</td>
                 <td>{{ item.recursos }}</td>
                 <td>{{ item.total }}</td>
-                <td>R$ {{ item.valor_unitario|floatformat:2 }}</td>
+                <td>R$ {{ item.valor_unitario_avaliacao|floatformat:2 }}</td>
                 <td>R$ {{ item.total_receber|floatformat:2 }}</td>
             </tr>
             {% empty %}

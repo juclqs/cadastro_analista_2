@@ -38,18 +38,18 @@ class Usuario(models.Model):
     cpf = models.CharField(max_length=14)
     matricula = models.CharField(max_length=20)
     email = models.EmailField(max_length=254, null=True, blank=True)
-    endereco = models.CharField(max_length=200)
+    endereco = models.CharField(max_length=200, blank=True, null=True)
     chave_pix = models.CharField(max_length=100, null=True, blank=True)
     campus = models.ForeignKey(Campus, on_delete=models.SET_NULL, null=True)
     grupos = models.ManyToManyField(GrupoTrabalho, blank=True, null=True)
-    banco = models.CharField(max_length=20)
-    agencia = models.CharField(max_length=20)
-    conta = models.CharField(max_length=20)
-    bairro = models.CharField(max_length=30)
+    banco = models.CharField(max_length=30, blank=True, null=True)
+    agencia = models.CharField(max_length=20, blank=True, null=True)
+    conta = models.CharField(max_length=20, blank=True, null=True)
+    bairro = models.CharField(max_length=30, blank=True, null=True)
     cidade = models.ForeignKey(Cidade, on_delete=models.SET_NULL, null=True)
     estado = models.ForeignKey(Estado, on_delete=models.SET_NULL, null=True)
-    cep = models.CharField(max_length=8)
-    telefone = models.CharField(max_length=11)
+    cep = models.CharField(max_length=10, blank=True, null=True)
+    telefone = models.CharField(max_length=15, blank=True, null=True)
     data_criacao = models.DateTimeField(
         auto_now_add=True, null=True, blank=True)
     data_atualizacao = models.DateTimeField(
@@ -59,9 +59,16 @@ class Usuario(models.Model):
     observacoes = models.TextField(max_length=200, null=True, blank=True)
 
     def clean(self):
-        self.cpf = ''.join(filter(str.isdigit, self.cpf))
-        self.cep = ''.join(filter(str.isdigit, self.cep))
-        self.telefone = ''.join(filter(str.isdigit, self.telefone))
+        super().clean()
+
+        if self.cpf:
+            self.cpf = ''.join(filter(str.isdigit, str(self.cpf)))
+
+        if self.cep:
+            self.cep = ''.join(filter(str.isdigit, str(self.cep)))
+
+        if self.telefone:
+            self.telefone = ''.join(filter(str.isdigit, str(self.telefone)))
 
     def __str__(self):
         return self.nome
@@ -70,11 +77,16 @@ class Usuario(models.Model):
 class Edital(models.Model):
     nome = models.CharField(max_length=200)
     numero = models.CharField(max_length=50)
+    ano = models.CharField(max_length=4, null=True, blank=True)
     campus = models.ManyToManyField(Campus, blank=True)
     avaliadores_historico = models.ManyToManyField(
         Usuario, blank=True, related_name='editais_historico')
     avaliadores_renda = models.ManyToManyField(
         Usuario, blank=True, related_name='editais_renda')
+    valor_unitario_avaliacao = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0.00)
+    valor_unitario_renda = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0.00)
     data_inicial_analise_historico = models.DateField(null=True, blank=True)
     data_final_analise_historico = models.DateField(null=True, blank=True)
     data_recurso_historico = models.DateField(null=True, blank=True)
